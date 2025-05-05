@@ -1,7 +1,7 @@
 // src/api/auth.ts
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
 export interface LoginData {
   email: string;
@@ -14,4 +14,4 @@ export interface LoginResponse {
 }
 
 export const login = (data: LoginData) =>
-  axios.post<LoginResponse>(`${API_URL}/auth/login`, data);
+  axios.post<LoginResponse>(`${API_URL}/users/login`, data);
