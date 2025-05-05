@@ -103,6 +103,7 @@ const Login: React.FC = () => {
                             bg="gray.600"
                             color="white"
                             placeholder="tucorreo@ejemplo.com"
+                            _placeholder={{ color: 'gray.400' }}
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             w="full"
@@ -121,6 +122,7 @@ const Login: React.FC = () => {
                                     color="white"
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="••••••••"
+                                    _placeholder={{ color: 'gray.400' }}
                                     value={password}
                                     onChange={e => setPassword(e.target.value)}
                                     w="full"
