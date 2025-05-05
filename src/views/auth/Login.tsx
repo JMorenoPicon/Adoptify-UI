@@ -1,12 +1,12 @@
 // src/views/auth/Login.tsx
 import React, { useState } from 'react';
 import {
+  Flex,
   Box,
   Heading,
   Input,
   Button,
   Text,
-  Flex,
   Link,
   Field,
 } from '@chakra-ui/react';
@@ -49,8 +49,10 @@ const Login: React.FC = () => {
       });
       navigate('/');
     } catch (err: unknown) {
-        const axiosError = err as AxiosError;
-      const msg = (axiosError?.response?.data as { message?: string })?.message || 'Error en la autenticación';
+      const axiosError = err as AxiosError;
+      const msg =
+        (axiosError.response?.data as { message?: string })?.message ||
+        'Error en la autenticación';
       setErrors({ general: msg });
       toaster.create({
         title: 'Error',
@@ -63,62 +65,89 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={12} p={6} boxShadow="lg" borderRadius="md">
-      <Heading mb={6} textAlign="center">Iniciar Sesión</Heading>
+    <Flex
+      minH="100vh"
+      w="full"               // <— asegura que el Flex ocupe todo el ancho
+      bg="gray.800"
+      align="center"
+      justify="center"
+      p={4}
+    >
+      <Box
+        maxW="md"
+        w="full"
+        p={6}
+        boxShadow="lg"
+        borderRadius="md"
+        bg="gray.700"
+      >
+        <Heading mb={6} textAlign="center" color="white">
+          Iniciar Sesión
+        </Heading>
 
-      {errors.general && (
-        <Text color="red.500" mb={4} textAlign="center">
-          {errors.general}
-        </Text>
-      )}
+        {errors.general && (
+          <Text color="red.300" mb={4} textAlign="center">
+            {errors.general}
+          </Text>
+        )}
 
-      <form onSubmit={handleSubmit}>
-        <Field.Root invalid={!!errors.email} mb={4}>
-          <Field.Label>Email</Field.Label>
-          <Box>
-            <Input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-          </Box>
-          <Field.ErrorText>{errors.email}</Field.ErrorText>
-        </Field.Root>
+        <form onSubmit={handleSubmit}>
+          <Field.Root invalid={!!errors.email} mb={4}>
+            <Field.Label color="white">Email</Field.Label>
+            <Box>
+              <Input
+                bg="gray.600"
+                color="white"
+                placeholder="tucorreo@ejemplo.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </Box>
+            <Field.ErrorText color="red.300">
+              {errors.email}
+            </Field.ErrorText>
+          </Field.Root>
 
-        <Field.Root invalid={!!errors.password} mb={6}>
-          <Field.Label>Contraseña</Field.Label>
-          <Box>
-            <Input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-          </Box>
-          <Field.ErrorText>{errors.password}</Field.ErrorText>
-        </Field.Root>
+          <Field.Root invalid={!!errors.password} mb={6}>
+            <Field.Label color="white">Contraseña</Field.Label>
+            <Box>
+              <Input
+                bg="gray.600"
+                color="white"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </Box>
+            <Field.ErrorText color="red.300">
+              {errors.password}
+            </Field.ErrorText>
+          </Field.Root>
 
-        <Button
-          type="submit"
-          colorScheme="teal"
-          width="full"
-          loading={loading}
-        >
-          Entrar
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            colorScheme="teal"
+            w="full"
+            loading={loading}
+            mb={4}
+          >
+            Entrar
+          </Button>
+        </form>
 
-      <Flex justify="space-between" mt={4}>
-        <Link as={RouterLink} color="teal.500" href="/auth/register">
-          Registrarse
-        </Link>
-        <Link as={RouterLink} color="teal.500" href="/auth/forgot-password">
-          ¿Olvidaste tu contraseña?
-        </Link>
-      </Flex>
+        <Flex justify="space-between">
+          <Link as={RouterLink} href="/auth/register" color="teal.300">
+            Registrarse
+          </Link>
+          <Link as={RouterLink} href="/auth/forgot-password" color="teal.300">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </Flex>
+      </Box>
 
-      {/* Renderiza los toasts */}
       <Toaster />
-    </Box>
+    </Flex>
   );
 };
 
