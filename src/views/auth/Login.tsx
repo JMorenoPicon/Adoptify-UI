@@ -160,11 +160,15 @@ const Login: React.FC = () => {
                 </form>
 
                 <Flex justify="space-between">
-                    <Link as={RouterLink} href="/auth/register" color="teal.300">
-                        Registrarse
+                    <Link asChild>
+                        <RouterLink to="/auth/register" style={{ color: "inherit" }}>
+                            Registrarse
+                        </RouterLink>
                     </Link>
-                    <Link as={RouterLink} href="/auth/forgot-password" color="teal.300">
-                        ¿Olvidaste tu contraseña?
+                    <Link asChild>
+                        <RouterLink to="/auth/forgot-password" style={{ color: "inherit" }}>
+                            ¿Olvidaste tu contraseña?
+                        </RouterLink>
                     </Link>
                 </Flex>
             </Box>
