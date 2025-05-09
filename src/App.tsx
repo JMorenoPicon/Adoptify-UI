@@ -5,7 +5,7 @@ import { Provider } from './components/ui/provider';
 
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
-// import ForgotPassword from './views/auth/ForgotPassword';
+import ForgotPassword from './views/auth/ForgotPassword';
 // import Home from './views/Home';
 
 const App: React.FC = () => (
@@ -18,7 +18,7 @@ const App: React.FC = () => (
         {/* Auth */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
-        {/* <Route path="/auth/forgot-password" element={<ForgotPassword />} /> */}
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
 
         {/* Catch-all: redirige al login */}
         <Route path="*" element={<Navigate to="/auth/login" replace />} />

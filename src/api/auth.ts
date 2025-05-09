@@ -14,7 +14,7 @@ export interface LoginResponse {
 }
 
 export interface RegisterData {
-  name: string;
+  username: string;
   email: string;
   password: string;
 }
@@ -24,6 +24,14 @@ export interface RegisterResponse {
     token: string;
   };
   // añade aquí cualquier otro campo que devuelva tu endpoint de registro
+}
+
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
 }
 
 /**
@@ -39,7 +47,7 @@ export const login = (data: LoginData) =>
 export const register = async (data: RegisterData): Promise<RegisterResponse> => {
   try {
     const response = await axios.post<RegisterResponse>(
-      `${API_URL}/users/register`,
+      `${API_URL}/users/`,
       data
     );
     return response.data;
@@ -48,10 +56,33 @@ export const register = async (data: RegisterData): Promise<RegisterResponse> =>
     if (axios.isAxiosError(error)) {
       const msg =
         (error.response?.data as { message?: string })?.message ||
-        'Error en el registro';
+        'Error en el registro: ${error.message}';
       throw new Error(msg);
     }
     // Para cualquier otro tipo de error
     throw new Error('Error desconocido en el registro');
+  }
+};
+
+/**
+ * Solicita un email de restablecimiento de contraseña
+ */
+export const forgotPassword = async (
+  data: ForgotPasswordData
+): Promise<ForgotPasswordResponse> => {
+  try {
+    const response = await axios.post<ForgotPasswordResponse>(
+      `${API_URL}/users/forgot-password`,
+      data
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const msg =
+        (error.response?.data as { message?: string })?.message ||
+        'Error al solicitar el restablecimiento';
+      throw new Error(msg);
+    }
+    throw new Error('Error desconocido al solicitar el restablecimiento');
   }
 };
