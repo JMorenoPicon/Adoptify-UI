@@ -6,14 +6,14 @@ import { Provider } from './components/ui/provider';
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
 import ForgotPassword from './views/auth/ForgotPassword';
-// import Home from './views/Home';
+import Home from './views/Home';
 
 const App: React.FC = () => (
   <Provider>
     <BrowserRouter>
       <Routes>
         {/* Redirige la raíz al login */}
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        <Route path="/" element={<Home />} />
 
         {/* Auth */}
         <Route path="/auth/login" element={<Login />} />
