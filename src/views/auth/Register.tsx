@@ -18,14 +18,14 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { register as apiRegister } from '@/api/auth';
 
 const Register: React.FC = () => {
-    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [errors, setErrors] = useState<{
-        name?: string;
+        username?: string;
         email?: string;
         password?: string;
         confirm?: string;
@@ -36,7 +36,7 @@ const Register: React.FC = () => {
 
     const validate = () => {
         const errs: typeof errors = {};
-        if (!name) errs.name = 'El nombre es obligatorio';
+        if (!username) errs.username = 'El nombre es obligatorio';
         if (!email) errs.email = 'El email es obligatorio';
         else if (!/\S+@\S+\.\S+/.test(email)) errs.email = 'Email no válido';
         if (!password) errs.password = 'La contraseña es obligatoria';
@@ -52,16 +52,17 @@ const Register: React.FC = () => {
         if (!validate()) return;
         setLoading(true);
         try {
-            const { data } = await apiRegister({ name, email, password });
+            const { data } = await apiRegister({ username, email, password });
             localStorage.setItem('token', data.token);
             toaster.create({
                 title: '¡Registro exitoso!',
                 description: 'Ya puedes iniciar sesión.',
                 type: 'success',
             });
+            await new Promise(resolve => setTimeout(resolve, 3000));
             navigate('/auth/login');
         } catch (err: unknown) {
-            let msg = 'Error en el registro';
+            let msg = `${err}`;
             if (axios.isAxiosError(err)) {
                 msg = (err.response?.data as { message?: string })?.message ?? msg;
             }
@@ -104,19 +105,19 @@ const Register: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <Field.Root invalid={!!errors.name} mb={4}>
-                        <Field.Label color="white">Nombre</Field.Label>
+                    <Field.Root invalid={!!errors.username} mb={4}>
+                        <Field.Label color="white">Nombre de usuario</Field.Label>
                         <Input
                             bg="gray.600"
                             color="white"
-                            placeholder="Tu nombre"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
+                            placeholder="Tu nombre de usuario"
+                            value={username}
+                            onChange={e => setUsername(e.target.value)}
                             w="full"
                             _placeholder={{ color: 'gray.400' }}
                         />
                         <Field.ErrorText color="red.300">
-                            {errors.name}
+                            {errors.username}
                         </Field.ErrorText>
                     </Field.Root>
 
