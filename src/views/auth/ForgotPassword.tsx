@@ -61,7 +61,7 @@ const ForgotPassword: React.FC = () => {
     <Flex
       minH="100vh"
       w="full"
-      bg="gray.800"
+      bg="pastelBlue.50"
       align="center"
       justify="center"
       px={4}
@@ -72,41 +72,41 @@ const ForgotPassword: React.FC = () => {
         p={6}
         boxShadow="lg"
         borderRadius="md"
-        bg="gray.700"
+        bg="white"
       >
-        <Heading mb={6} textAlign="center" color="white">
+        <Heading mb={6} textAlign="center" color="brand.600">
           ¿Olvidaste tu contraseña?
         </Heading>
 
         {errors.general && (
-          <Text color="red.300" mb={4} textAlign="center">
+          <Text color="brand.500" mb={4} textAlign="center">
             {errors.general}
           </Text>
         )}
 
         {sent ? (
-          <Text color="green.300" textAlign="center">
+          <Text color="accent.500" textAlign="center">
             Revisa tu correo para el enlace de restablecimiento.
           </Text>
         ) : (
           <form onSubmit={handleSubmit}>
             <Field.Root invalid={!!errors.email} mb={6}>
-              <Field.Label color="white">Email</Field.Label>
+              <Field.Label color="brand.700">Email</Field.Label>
               <Input
-                bg="gray.600"
-                color="white"
+                bg="pastelBlue.100"
+                color="gray.800"
                 placeholder="tucorreo@ejemplo.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 w="full"
-                _placeholder={{ color: 'gray.400' }}
+                _placeholder={{ color: 'black' }}
               />
-              <Field.ErrorText color="red.300">{errors.email}</Field.ErrorText>
+              <Field.ErrorText color="brand.500">{errors.email}</Field.ErrorText>
             </Field.Root>
 
             <Button
               type="submit"
-              colorScheme="teal"
+              colorScheme="brand"
               w="full"
               loading={loading}
               mb={4}
@@ -118,7 +118,7 @@ const ForgotPassword: React.FC = () => {
 
         <Flex justify="center" mt={4}>
           <Link asChild>
-            <RouterLink to="/auth/login" style={{ color: 'inherit' }}>
+            <RouterLink to="/auth/login" style={{ color: 'accent.500' }}>
               Volver al login
             </RouterLink>
           </Link>
