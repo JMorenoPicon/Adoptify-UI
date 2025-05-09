@@ -56,7 +56,7 @@ export const register = async (data: RegisterData): Promise<RegisterResponse> =>
     if (axios.isAxiosError(error)) {
       const msg =
         (error.response?.data as { message?: string })?.message ||
-        'Error en el registro: ${error.message}';
+        'Error en el registro';
       throw new Error(msg);
     }
     // Para cualquier otro tipo de error

@@ -11,9 +11,14 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useColorModeValue } from '@/components/ui/color-mode';
 
 const Home: React.FC = () => {
-    const overlayBg = useColorModeValue('rgba(255, 255, 255, 0.3)', 'rgba(0, 0, 0, 0.3)');
-    const headingColor = useColorModeValue('gray.800', 'white');
-    const textColor = useColorModeValue('white.700', 'white.200');
+    // Capa de superposición más clara en light y dark modes
+  const overlayBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.3)',
+    'rgba(0,0,0,0.4)'
+  );
+  // Título en naranja de brand, texto en gris oscuro o claro
+  const headingColor = useColorModeValue('brand.600', 'brand.200');
+  const textColor = useColorModeValue('gray.800', 'gray.200');
 
     return (
         <Box position="relative" h="100vh" w="full" overflow="hidden">
@@ -24,10 +29,10 @@ const Home: React.FC = () => {
                 left={0}
                 w="full"
                 h="full"
-                backgroundImage="url('../homeImage.png')"  // Ajusta la ruta a tu imagen
-                backgroundSize="contain"
-                backgroundPosition="center"
-                backgroundRepeat="repeat"
+                backgroundImage="url('../homeImage.png')"
+                backgroundRepeat="no-repeat"
+                backgroundPosition="left-center"
+                backgroundSize="auto 100%"
                 zIndex={0}
             />
 
@@ -63,12 +68,12 @@ const Home: React.FC = () => {
                 </Text>
                 <Flex gap={4}>
                     <RouterLink to="/auth/login">
-                        <Button colorScheme="teal" size="lg">
+                        <Button colorScheme="brand" size="lg">
                             Iniciar Sesión
                         </Button>
                     </RouterLink>
                     <RouterLink to="/auth/register">
-                        <Button colorScheme="teal" size="lg">
+                        <Button variant="outline" colorScheme="brand" size="lg">
                             Registrarse
                         </Button>
                     </RouterLink>
