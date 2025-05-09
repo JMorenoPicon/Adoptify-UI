@@ -51,7 +51,7 @@ const Login: React.FC = () => {
         description: 'Has iniciado sesión satisfactoriamente.',
         type: 'success',
       });
-      navigate('/');
+      navigate('/index');
     } catch (err: unknown) {
       let msg = 'Error en la autenticación';
       if (axios.isAxiosError(err)) {

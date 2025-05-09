@@ -1,18 +1,32 @@
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from './components/ui/provider';
+import Navbar from './components/Navbar';
 
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
 import ForgotPassword from './views/auth/ForgotPassword';
 import Home from './views/Home';
+import Index from './views/Index';
+import ProtectedRoute from './components/ProtectedRoute';
 
-const App: React.FC = () => (
-  <Provider>
-    <BrowserRouter>
+const NoNavBarRoutes = [
+  '/',
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+];
+
+const AppContent: React.FC = () => {
+  const { pathname } = useLocation();
+  const showNavbar = !NoNavBarRoutes.includes(pathname);
+
+  return (
+    <>
+      {showNavbar && <Navbar />}
       <Routes>
-        {/* Redirige la raíz al login */}
+        {/* Public landing */}
         <Route path="/" element={<Home />} />
 
         {/* Auth */}
@@ -20,9 +34,27 @@ const App: React.FC = () => (
         <Route path="/auth/register" element={<Register />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
 
-        {/* Catch-all: redirige al login */}
-        <Route path="*" element={<Navigate to="/auth/login" replace />} />
+        {/* Protected */}
+        <Route
+          path="/index"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+    </>
+  );
+};
+
+const App: React.FC = () => (
+  <Provider>
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   </Provider>
 );
