@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
-    navigate('/auth/login', { replace: true })
+    navigate('/', { replace: true })
   }
 
   return (
