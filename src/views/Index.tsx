@@ -28,7 +28,7 @@ const Index: React.FC = () => {
       >
         {/* Aquí irá el contenido principal */}
         <Heading mb={4} textAlign="center" color="brand.600">
-          Bienvenido de nuevo
+          Bienvenido a Pet Finder
         </Heading>
         <Text textAlign="center" color="gray.600">
           Esta es tu área privada. Pronto podrás ver aquí estadísticas, acceso rápido

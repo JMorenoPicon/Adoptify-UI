@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Provider } from './components/ui/provider';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 import Login from './views/auth/Login';
 import Register from './views/auth/Register';
@@ -47,6 +48,7 @@ const AppContent: React.FC = () => {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      {showNavbar && <Footer />}
     </>
   );
 };
