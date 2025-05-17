@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
       </Text>
       <Text fontSize="sm">
         <a
-          href="https://github.com/tu-usuario/pet-finder"
+          href="https://github.com/JMorenoPicon"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'teal', textDecoration: 'underline' }}
