@@ -1,5 +1,4 @@
-// src/views/Index.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Flex,
@@ -8,12 +7,15 @@ import {
   Image,
   Button,
   SimpleGrid,
+  Spinner,
 } from '@chakra-ui/react';
 import Slider from 'react-slick';
+import axios from 'axios';
 import { useColorModeValue } from '@/components/ui/color-mode';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
-// Datos de ejemplo (más adelante reemplaza con fetch/axios)
+
 const news = [
   {
     id: 1,
@@ -35,21 +37,15 @@ const news = [
   },
 ];
 
-const adoptablePets = [
-  { id: 1, name: 'Max', breed: 'Labrador', age: '3 años', image: '/images/dog1.jpg' },
-  { id: 2, name: 'Luna', breed: 'Siamés', age: '2 años', image: '/images/cat1.jpg' },
-  { id: 3, name: 'Rocky', breed: 'Bulldog', age: '4 años', image: '/images/dog2.jpg' },
-  { id: 4, name: 'Mia', breed: 'Persa', age: '1 año', image: '/images/cat2.jpg' },
-];
-
-const lostPets = [
-  { id: 1, name: 'Toby', lastSeen: 'Parque Central', date: '2025-05-10', image: '/images/dog3.jpg' },
-  { id: 2, name: 'Nina', lastSeen: 'Barrio Norte', date: '2025-05-12', image: '/images/cat3.jpg' },
-];
-
 const Index: React.FC = () => {
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
   const color = useColorModeValue('gray.800', 'gray.100');
+
+  // Estado para datos reales
+  const [adoptablePets, setAdoptablePets] = useState([]);
+  const [lostPets, setLostPets] = useState([]);
+  const [loadingAdoptable, setLoadingAdoptable] = useState(true);
+  const [loadingLost, setLoadingLost] = useState(true);
 
   const sliderSettings = {
     dots: true,
@@ -60,6 +56,35 @@ const Index: React.FC = () => {
     autoplay: true,
     autoplaySpeed: 4000,
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    // Cargar mascotas adoptables
+    axios.get(`${API_URL}/pets/adoptable`, { headers })
+      .then(res => {
+        setAdoptablePets(res.data);
+      })
+      .catch(err => {
+        console.error('Error al cargar mascotas adoptables:', err);
+      })
+      .finally(() => {
+        setLoadingAdoptable(false);
+      });
+
+    // Cargar mascotas perdidas
+    axios.get(`${API_URL}/pets/lost`, { headers })
+      .then(res => {
+        setLostPets(res.data);
+      })
+      .catch(err => {
+        console.error('Error al cargar mascotas perdidas:', err);
+      })
+      .finally(() => {
+        setLoadingLost(false);
+      });
+  }, []);
 
   return (
     <Flex
@@ -80,7 +105,7 @@ const Index: React.FC = () => {
           Explora las últimas noticias, mascotas en adopción y avisos de mascotas perdidas.
         </Text>
 
-        {/* Carrusel de noticias */}
+        {/* Carrusel de noticias (fijo, frontend) */}
         <Box mb={12}>
           <Slider {...sliderSettings}>
             {news.map(({ id, title, image, url }) => (
@@ -121,40 +146,51 @@ const Index: React.FC = () => {
           <Heading size="md" mb={6}>
             Últimas mascotas en adopción
           </Heading>
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-            {adoptablePets.map(({ id, name, breed, age, image }) => (
-              <Box
-                key={id}
-                bg="white"
-                borderRadius="md"
-                boxShadow="md"
-                overflow="hidden"
-                _hover={{ boxShadow: 'xl' }}
-              >
-                <Image
-                  src={image}
-                  alt={name}
-                  w="full"
-                  h="200px"
-                  objectFit="cover"
-                />
-                <Box p={4}>
-                  <Heading size="sm" mb={1} color="brand.600">
-                    {name}
-                  </Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    {breed}
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Edad: {age}
-                  </Text>
-                  <Button mt={3} colorScheme="brand" size="sm" w="full">
-                    Ver detalles
-                  </Button>
-                </Box>
-              </Box>
-            ))}
-          </SimpleGrid>
+
+          {loadingAdoptable ? (
+            <Spinner />
+          ) : (
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
+              {adoptablePets.map(({ id, name, breed, birthDate, image }) => {
+                // Calcula edad (puedes adaptar según tu modelo)
+                const birth = new Date(birthDate);
+                const age = new Date().getFullYear() - birth.getFullYear();
+
+                return (
+                  <Box
+                    key={id}
+                    bg="white"
+                    borderRadius="md"
+                    boxShadow="md"
+                    overflow="hidden"
+                    _hover={{ boxShadow: 'xl' }}
+                  >
+                    <Image
+                      src={image}
+                      alt={name}
+                      w="full"
+                      h="200px"
+                      objectFit="cover"
+                    />
+                    <Box p={4}>
+                      <Heading size="sm" mb={1} color="brand.600">
+                        {name}
+                      </Heading>
+                      <Text fontSize="sm" color="gray.600">
+                        {breed}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Edad: {age} años
+                      </Text>
+                      <Button mt={3} colorScheme="brand" size="sm" w="full">
+                        Ver detalles
+                      </Button>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </SimpleGrid>
+          )}
         </Box>
 
         {/* Avisos de mascotas perdidas */}
@@ -162,40 +198,45 @@ const Index: React.FC = () => {
           <Heading size="md" mb={6}>
             Avisos de mascotas perdidas
           </Heading>
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-            {lostPets.map(({ id, name, lastSeen, date, image }) => (
-              <Box
-                key={id}
-                bg="white"
-                borderRadius="md"
-                boxShadow="md"
-                overflow="hidden"
-                _hover={{ boxShadow: 'xl' }}
-              >
-                <Image
-                  src={image}
-                  alt={name}
-                  w="full"
-                  h="200px"
-                  objectFit="cover"
-                />
-                <Box p={4}>
-                  <Heading size="sm" mb={1} color="brand.600">
-                    {name}
-                  </Heading>
-                  <Text fontSize="sm" color="gray.600">
-                    Última vez visto: {lastSeen}
-                  </Text>
-                  <Text fontSize="sm" color="gray.600">
-                    Fecha: {new Date(date).toLocaleDateString()}
-                  </Text>
-                  <Button mt={3} colorScheme="brand" size="sm" w="full">
-                    Más información
-                  </Button>
+
+          {loadingLost ? (
+            <Spinner />
+          ) : (
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
+              {lostPets.map(({ id, name, lastSeen, dateReported, image }) => (
+                <Box
+                  key={id}
+                  bg="white"
+                  borderRadius="md"
+                  boxShadow="md"
+                  overflow="hidden"
+                  _hover={{ boxShadow: 'xl' }}
+                >
+                  <Image
+                    src={image}
+                    alt={name}
+                    w="full"
+                    h="200px"
+                    objectFit="cover"
+                  />
+                  <Box p={4}>
+                    <Heading size="sm" mb={1} color="brand.600">
+                      {name}
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600">
+                      Última vez visto: {lastSeen}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      Fecha: {new Date(dateReported).toLocaleDateString()}
+                    </Text>
+                    <Button mt={3} colorScheme="brand" size="sm" w="full">
+                      Más información
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
-          </SimpleGrid>
+              ))}
+            </SimpleGrid>
+          )}
         </Box>
       </Box>
     </Flex>
