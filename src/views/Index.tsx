@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CloudinaryImage from '@/components/multimedia/CloudinaryImage';
 import {
   Box,
   Flex,
@@ -20,19 +21,19 @@ const news = [
   {
     id: 1,
     title: 'Consejos para cuidar a tu perro en verano',
-    image: '/images/news1.jpg',
+    image: 'perro-verano_wpyhfb', //publicId de cloudinary
     url: '#',
   },
   {
     id: 2,
     title: 'Cómo preparar a tu gato para la llegada de un bebé',
-    image: '/images/news2.jpg',
+    image: 'gato-bebe_yvkzsk',
     url: '#',
   },
   {
     id: 3,
     title: 'Beneficios de adoptar en lugar de comprar',
-    image: '/images/news3.jpg',
+    image: 'adoptar-beneficios_owuem4',
     url: '#',
   },
 ];
@@ -116,13 +117,13 @@ const Index: React.FC = () => {
                 overflow="hidden"
                 cursor="pointer"
                 onClick={() => window.open(url, '_blank')}
+                w="100%"
+                h={{ base: '200px', md: '300px' }} // Ajusta la altura según tu diseño
               >
-                <Image
-                  src={image}
-                  alt={title}
-                  w="full"
-                  h={{ base: '200px', md: '300px' }}
-                  objectFit="cover"
+                <CloudinaryImage
+                  publicId={image}
+                  width={800}
+                  height={300}
                 />
                 <Box
                   pos="absolute"
