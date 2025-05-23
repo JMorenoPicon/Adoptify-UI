@@ -14,6 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import News1 from './views/news/News1';
 import News2 from './views/news/News2';
 import News3 from './views/news/News3';
+import Profile from './views/profile/Profile';
 
 const NoNavBarRoutes = [
   '/',
@@ -68,6 +69,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <News3 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
