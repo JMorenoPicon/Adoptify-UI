@@ -171,7 +171,7 @@ const Index: React.FC = () => {
                       alt={name}
                       w="full"
                       h="200px"
-                      objectFit="cover"
+                      objectFit="contain"
                     />
                     <Box p={4}>
                       <Heading size="sm" mb={1} color="brand.600">
@@ -204,38 +204,44 @@ const Index: React.FC = () => {
             <Spinner />
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-              {lostPets.map(({ id, name, lastSeen, dateReported, image }) => (
-                <Box
-                  key={id}
-                  bg="white"
-                  borderRadius="md"
-                  boxShadow="md"
-                  overflow="hidden"
-                  _hover={{ boxShadow: 'xl' }}
-                >
-                  <Image
-                    src={image}
-                    alt={name}
-                    w="full"
-                    h="200px"
-                    objectFit="cover"
-                  />
-                  <Box p={4}>
-                    <Heading size="sm" mb={1} color="brand.600">
-                      {name}
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600">
-                      Última vez visto: {lastSeen}
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      Fecha: {new Date(dateReported).toLocaleDateString()}
-                    </Text>
-                    <Button mt={3} colorScheme="brand" size="sm" w="full">
-                      Más información
-                    </Button>
+              {lostPets.map(({ id, name, breed, birthDate, image }) => {
+                // Calcula edad (puedes adaptar según tu modelo)
+                const birth = new Date(birthDate);
+                const age = new Date().getFullYear() - birth.getFullYear();
+
+                return (
+                  <Box
+                    key={id}
+                    bg="white"
+                    borderRadius="md"
+                    boxShadow="md"
+                    overflow="hidden"
+                    _hover={{ boxShadow: 'xl' }}
+                  >
+                    <Image
+                      src={image}
+                      alt={name}
+                      w="full"
+                      h="200px"
+                      objectFit="contain"
+                    />
+                    <Box p={4}>
+                      <Heading size="sm" mb={1} color="brand.600">
+                        {name}
+                      </Heading>
+                      <Text fontSize="sm" color="gray.600">
+                        {breed}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Edad: {age} años
+                      </Text>
+                      <Button mt={3} colorScheme="brand" size="sm" w="full">
+                        Ver detalles
+                      </Button>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                );
+              })}
             </SimpleGrid>
           )}
         </Box>
