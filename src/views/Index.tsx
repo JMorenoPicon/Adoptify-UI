@@ -13,6 +13,7 @@ import {
 import Slider from 'react-slick';
 import axios from 'axios';
 import { useColorModeValue } from '@/components/ui/color-mode';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
@@ -22,25 +23,26 @@ const news = [
     id: 1,
     title: 'Consejos para cuidar a tu perro en verano',
     image: 'perro-verano_wpyhfb', //publicId de cloudinary
-    url: '#',
+    url: 'news/news1',
   },
   {
     id: 2,
     title: 'Cómo preparar a tu gato para la llegada de un bebé',
     image: 'gato-bebe_yvkzsk',
-    url: '#',
+    url: 'news/news2',
   },
   {
     id: 3,
     title: 'Beneficios de adoptar en lugar de comprar',
     image: 'adoptar-beneficios_owuem4',
-    url: '#',
+    url: 'news/news3',
   },
 ];
 
 const Index: React.FC = () => {
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
   const color = useColorModeValue('gray.800', 'gray.100');
+  const navigate = useNavigate();
 
   // Estado para datos reales
   const [adoptablePets, setAdoptablePets] = useState([]);
@@ -116,7 +118,7 @@ const Index: React.FC = () => {
                 borderRadius="md"
                 overflow="hidden"
                 cursor="pointer"
-                onClick={() => window.open(url, '_blank')}
+                onClick={() => navigate(`/${url}`)}
                 w="100%"
                 h={{ base: '200px', md: '300px' }} // Ajusta la altura según tu diseño
               >

@@ -11,6 +11,9 @@ import ForgotPassword from './views/auth/ForgotPassword';
 import Home from './views/Home';
 import Index from './views/Index';
 import ProtectedRoute from './components/ProtectedRoute';
+import News1 from './views/news/News1';
+import News2 from './views/news/News2';
+import News3 from './views/news/News3';
 
 const NoNavBarRoutes = [
   '/',
@@ -41,6 +44,30 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <Index />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/news/news1"
+          element={
+            <ProtectedRoute>
+              <News1 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/news/news2"
+          element={
+            <ProtectedRoute>
+              <News2 />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/news/news3"
+          element={
+            <ProtectedRoute>
+              <News3 />
             </ProtectedRoute>
           }
         />
