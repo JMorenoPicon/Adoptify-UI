@@ -54,6 +54,8 @@ const Register: React.FC = () => {
     try {
       const { data } = await apiRegister({ username, email, password });
       localStorage.setItem('token', data.token);
+      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hora
+      localStorage.setItem('token_expires', expiresAt.toString());
       toaster.create({
         title: '¡Registro exitoso!',
         description: 'Ya puedes iniciar sesión.',
