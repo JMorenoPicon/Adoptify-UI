@@ -9,7 +9,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { FiLogOut } from 'react-icons/fi'
+import { FiLogOut, FiUser } from 'react-icons/fi'
 import { useColorModeValue } from '@/components/ui/color-mode'
 
 const Navbar: React.FC = () => {
@@ -63,19 +63,20 @@ const Navbar: React.FC = () => {
             Inicio
           </Button>
         </RouterLink>
-        <RouterLink to="/profile">
-          <Button
-            variant="ghost"
-            _hover={{ bg: 'pastelBlue.50' }}
-            color="gray.600"
-          >
-            Perfil
-          </Button>
-        </RouterLink>
-        {/* Añade más enlaces aquí */}
+        {/* Añade más enlaces aquí: boton para adopcion y para reportes de mascotas perdidas */}
       </HStack>
 
-      {/* Botón de cerrar sesión */}
+      {/* Icono de usuario y cerrar sesión */}
+      <HStack gap={2}>
+        <IconButton
+          aria-label="Perfil"
+          variant="ghost"
+          color="brand.500"
+          _hover={{ bg: 'pastelBlue.50', color: 'brand.600' }}
+          onClick={() => navigate('/profile')}
+        >
+          <FiUser />
+        </IconButton>
       <IconButton
         aria-label="Cerrar sesión"
         variant="ghost"
@@ -85,6 +86,7 @@ const Navbar: React.FC = () => {
       >
       <FiLogOut />
       </IconButton>
+      </HStack>
     </Flex>
 )
 };
