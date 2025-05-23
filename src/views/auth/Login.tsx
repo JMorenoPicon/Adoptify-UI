@@ -17,6 +17,7 @@ import { toaster, Toaster } from '@/components/ui/toaster';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { login } from '@/api/auth';
 import axios from 'axios';
+import { useEffect } from 'react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -29,6 +30,14 @@ const Login: React.FC = () => {
   }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const expires = localStorage.getItem('token_expires');
+    if (token && expires && Date.now() < Number(expires)) {
+      navigate('/index', { replace: true });
+    }
+  }, [navigate]);
 
   const validate = () => {
     const errs: typeof errors = {};
