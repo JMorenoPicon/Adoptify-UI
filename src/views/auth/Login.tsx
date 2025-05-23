@@ -45,7 +45,9 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       const { data } = await login({ email, password });
+      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
       localStorage.setItem('token', data.token);
+      localStorage.setItem('token_expires', expiresAt.toString());
       toaster.create({
         title: '¡Login correcto!',
         description: 'Has iniciado sesión satisfactoriamente.',
