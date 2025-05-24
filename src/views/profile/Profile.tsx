@@ -7,6 +7,14 @@ import {
   SimpleGrid,
   Spinner,
 } from '@chakra-ui/react';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  DialogCloseTrigger,
+} from '@/components/ui/dialog';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { Field } from '@/components/ui/field';
 import { InputGroup } from '@/components/ui/input-group';
@@ -33,7 +41,7 @@ interface User {
 }
 
 interface Pet {
-  id: string | number;
+  _id: string;
   name: string;
   breed: string;
   birthDate: Date;
@@ -56,6 +64,25 @@ const Profile: React.FC = () => {
   const [petForm, setPetForm] = useState(initialPetForm);
   const [petFormErrors, setPetFormErrors] = useState<{ [k: string]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
+
+  const openDeleteModal = (pet: Pet) => {
+    setPetToDelete(pet);
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setPetToDelete(null);
+    setDeleteModalOpen(false);
+  };
+
+  const confirmDeletePet = async () => {
+    if (petToDelete) {
+      await handleDeletePet(petToDelete._id);
+      closeDeleteModal();
+    }
+  };
 
   // Cargar datos de usuario y mascotas
   useEffect(() => {
@@ -189,6 +216,22 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleDeletePet = async (petId: string | number) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      await axios.delete(`${API_URL}/pets/${petId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toaster.create({ title: 'Mascota eliminada', type: 'success' });
+      // Recarga mascotas
+      const petsRes = await axios.get(`${API_URL}/pets/mine`, { headers: { Authorization: `Bearer ${token}` } });
+      setPets(petsRes.data);
+    } catch (err) {
+      toaster.create({ title: 'Error', description: `No se pudo eliminar la mascota: ${err}, ${petId}`, type: 'error' });
+    }
+  };
+
   if (loading) return <Spinner />;
 
   return (
@@ -263,7 +306,11 @@ const Profile: React.FC = () => {
               )}
             </Field>
             <Button colorScheme="brand" type="submit" mr={2}>Guardar</Button>
-            <Button variant="ghost" onClick={() => setEditMode(false)}>Cancelar</Button>
+            <Button variant="ghost"
+              bg="brand.500"
+              color="white"
+              _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+              onClick={() => setEditMode(false)}>Cancelar</Button>
           </Box>
         ) : (
           <Box>
@@ -426,7 +473,11 @@ const Profile: React.FC = () => {
                 )}
                 <Box mt={4} display="flex" gap={2}>
                   <Button colorScheme="brand" type="submit">Guardar</Button>
-                  <Button variant="ghost" onClick={() => setShowPetModal(false)}>Cancelar</Button>
+                  <Button variant="ghost"
+                    bg="brand.500"
+                    color="white"
+                    _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                    onClick={() => setShowPetModal(false)}>Cancelar</Button>
                 </Box>
               </form>
             </Box>
@@ -455,7 +506,7 @@ const Profile: React.FC = () => {
 
               return (
                 <Box
-                  key={pet.id}
+                  key={pet._id}
                   bg="white"
                   borderRadius="md"
                   boxShadow="md"
@@ -495,6 +546,15 @@ const Profile: React.FC = () => {
                     <Button mt={3} colorScheme="brand" size="sm" w="full">
                       Ver detalles
                     </Button>
+                    <Button
+                      mt={2}
+                      colorScheme="red"
+                      size="sm"
+                      w="full"
+                      onClick={() => openDeleteModal(pet)}
+                    >
+                      Eliminar
+                    </Button>
                   </Box>
                 </Box>
               );
@@ -502,6 +562,29 @@ const Profile: React.FC = () => {
           </SimpleGrid>
         )}
       </Box>
+      <DialogRoot
+        open={deleteModalOpen} onOpenChange={details => setDeleteModalOpen(details.open)}>
+        <DialogContent>
+          <DialogHeader>Eliminar mascota</DialogHeader>
+          <DialogBody>
+            ¿Seguro que quieres eliminar a <strong>{petToDelete?.name}</strong>? Esta acción no se puede deshacer.
+          </DialogBody>
+          <DialogFooter>
+            <Button colorScheme="red" mr={3} onClick={confirmDeletePet}>
+              Eliminar
+            </Button>
+            <DialogCloseTrigger asChild>
+              <Button variant="ghost"
+                bg="brand.500"
+                color="white"
+                _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                onClick={closeDeleteModal}>
+                Cancelar
+              </Button>
+            </DialogCloseTrigger>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
       <Toaster />
     </Box>
   );

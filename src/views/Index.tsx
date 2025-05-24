@@ -147,7 +147,7 @@ const Index: React.FC = () => {
         {/* Últimas mascotas en adopción */}
         <Box mb={12}>
           <Heading size="md" mb={6}>
-            Últimas mascotas en adopción
+            Nuevas mascotas en adopción
           </Heading>
 
           {loadingAdoptable ? (
@@ -214,7 +214,7 @@ const Index: React.FC = () => {
         {/* Avisos de mascotas perdidas */}
         <Box>
           <Heading size="md" mb={6}>
-            Avisos de mascotas perdidas
+            Mascotas perdidas recientes
           </Heading>
 
           {loadingLost ? (
