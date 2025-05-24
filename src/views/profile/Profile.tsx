@@ -10,7 +10,7 @@ import {
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { Field } from '@/components/ui/field';
 import { InputGroup } from '@/components/ui/input-group';
-import { toaster } from '@/components/ui/toaster';
+import { toaster, Toaster } from '@/components/ui/toaster';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
@@ -77,7 +77,7 @@ const Profile: React.FC = () => {
     const token = localStorage.getItem('token');
     try {
       await axios.put(
-        `${API_URL}/users/me`,
+        `${API_URL}/users/profile`,
         {
           username: form.username,
           email: form.email,
@@ -213,6 +213,7 @@ const Profile: React.FC = () => {
           </SimpleGrid>
         )}
       </Box>
+      <Toaster />
     </Box>
   );
 };
