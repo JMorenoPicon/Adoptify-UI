@@ -155,9 +155,24 @@ const Index: React.FC = () => {
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
               {adoptablePets.map(({ id, name, breed, birthDate, image }) => {
-                // Calcula edad (puedes adaptar según tu modelo)
                 const birth = new Date(birthDate);
-                const age = new Date().getFullYear() - birth.getFullYear();
+                const now = new Date();
+                let ageText = "";
+
+                const years = now.getFullYear() - birth.getFullYear();
+                const months =
+                  now.getMonth() - birth.getMonth() + years * 12;
+                const days = Math.floor(
+                  (now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24)
+                );
+
+                if (years > 0) {
+                  ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
+                } else if (months > 0) {
+                  ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
+                } else {
+                  ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
+                }
 
                 return (
                   <Box
@@ -183,7 +198,7 @@ const Index: React.FC = () => {
                         {breed}
                       </Text>
                       <Text fontSize="sm" color="gray.600">
-                        Edad: {age} años
+                        {ageText}
                       </Text>
                       <Button mt={3} colorScheme="brand" size="sm" w="full">
                         Ver detalles
@@ -207,9 +222,24 @@ const Index: React.FC = () => {
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
               {lostPets.map(({ id, name, breed, birthDate, image }) => {
-                // Calcula edad (puedes adaptar según tu modelo)
                 const birth = new Date(birthDate);
-                const age = new Date().getFullYear() - birth.getFullYear();
+                const now = new Date();
+                let ageText = "";
+
+                const years = now.getFullYear() - birth.getFullYear();
+                const months =
+                  now.getMonth() - birth.getMonth() + years * 12;
+                const days = Math.floor(
+                  (now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24)
+                );
+
+                if (years > 0) {
+                  ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
+                } else if (months > 0) {
+                  ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
+                } else {
+                  ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
+                }
 
                 return (
                   <Box
@@ -235,7 +265,7 @@ const Index: React.FC = () => {
                         {breed}
                       </Text>
                       <Text fontSize="sm" color="gray.600">
-                        Edad: {age} años
+                        {ageText}
                       </Text>
                       <Button mt={3} colorScheme="brand" size="sm" w="full">
                         Ver detalles

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Heading,
@@ -13,6 +13,18 @@ import { InputGroup } from '@/components/ui/input-group';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import axios from 'axios';
 
+const initialPetForm = {
+  name: '',
+  species: '',
+  breed: '',
+  birthDate: '',
+  description: '',
+  image: null as File | null,
+  status: 'available',
+  lastSeen: '',
+  reservedAt: '',
+};
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
 interface User {
@@ -24,8 +36,12 @@ interface Pet {
   id: string | number;
   name: string;
   breed: string;
+  birthDate: Date;
   age: number;
   image: string;
+  status?: string;
+  lastSeen?: string;
+  reservedAt?: string;
 }
 
 const Profile: React.FC = () => {
@@ -36,6 +52,10 @@ const Profile: React.FC = () => {
   const [form, setForm] = useState({ username: '', email: '', currentPassword: '', password: '' });
   const [errors, setErrors] = useState<{ username?: string; email?: string; password?: string; currentPassword?: string }>({});
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
+  const [showPetModal, setShowPetModal] = useState(false);
+  const [petForm, setPetForm] = useState(initialPetForm);
+  const [petFormErrors, setPetFormErrors] = useState<{ [k: string]: string }>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cargar datos de usuario y mascotas
   useEffect(() => {
@@ -96,6 +116,76 @@ const Profile: React.FC = () => {
         msg = (err.response?.data as { message?: string })?.message ?? msg;
       }
       toaster.create({ title: 'Error', description: msg, type: 'error' });
+    }
+  };
+
+  // --- Mascotas ---
+
+  const handlePetFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const target = e.target;
+    const name = target.name;
+    let value: string | File | null = '';
+    if (target instanceof HTMLInputElement && target.type === 'file') {
+      value = target.files && target.files[0] ? target.files[0] : null;
+      setPetForm(f => ({ ...f, [name]: value }));
+    } else {
+      value = target.value;
+      setPetForm(f => ({ ...f, [name]: value }));
+    }
+  };
+
+  const validatePetForm = () => {
+    const errs: { [k: string]: string } = {};
+    if (!petForm.name) errs.name = 'El nombre es obligatorio';
+    if (!petForm.species) errs.species = 'La especie es obligatoria';
+    if (!petForm.breed) errs.breed = 'La raza es obligatoria';
+    else if (new Date(petForm.birthDate) > new Date()) errs.birthDate = 'La fecha no puede ser futura';
+    if (!petForm.birthDate) errs.birthDate = 'La fecha de nacimiento es obligatoria';
+    if (!petForm.description) errs.description = 'La descripción es obligatoria';
+    if (!petForm.image) errs.image = 'La imagen es obligatoria';
+    if (!petForm.status) errs.status = 'El estado es obligatorio';
+    if (petForm.status === 'lost' && !petForm.lastSeen) errs.lastSeen = 'Este campo es obligatorio';
+    if (petForm.status === 'reserved' && !petForm.reservedAt) errs.reservedAt = 'Este campo es obligatorio';
+    setPetFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handlePetFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validatePetForm()) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    let imageBase64 = '';
+    if (petForm.image) {
+      imageBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(petForm.image as File);
+      });
+    }
+
+    try {
+      await axios.post(`${API_URL}/pets`, {
+        name: petForm.name,
+        species: petForm.species,
+        breed: petForm.breed,
+        birthDate: petForm.birthDate,
+        description: petForm.description,
+        image: imageBase64,
+        status: petForm.status === 'reserved' ? 'reserved' : petForm.status,
+        lastSeen: petForm.status === 'lost' ? petForm.lastSeen : undefined,
+        reservedAt: petForm.status === 'reserved' ? petForm.reservedAt : undefined,
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      toaster.create({ title: 'Mascota registrada', type: 'success' });
+      setShowPetModal(false);
+      setPetForm(initialPetForm);
+      // Recarga mascotas
+      const petsRes = await axios.get(`${API_URL}/pets/mine`, { headers: { Authorization: `Bearer ${token}` } });
+      setPets(petsRes.data);
+    } catch (err: unknown) {
+      toaster.create({ title: 'Error', description: 'No se pudo registrar la mascota', type: `error: ${err}` });
     }
   };
 
@@ -185,31 +275,230 @@ const Profile: React.FC = () => {
       </Box>
       {/* Sección mascotas */}
       <Box>
-        <Heading size="md" mb={4}>Mis mascotas</Heading>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
+          <Heading size="md">Mis mascotas</Heading>
+          <Button colorScheme="brand" size="sm" onClick={() => setShowPetModal(true)}>
+            Añadir mascota
+          </Button>
+        </Box>
+        {/* Modal para añadir mascota */}
+        {showPetModal && (
+          <Box
+            pos="fixed"
+            top={0}
+            left={0}
+            w="100vw"
+            h="100vh"
+            bg="blackAlpha.600"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            zIndex={1000}
+          >
+            <Box bg="white" p={6} borderRadius="md" minW="350px" maxW="90vw">
+              <Heading size="md" mb={4}>Registrar nueva mascota</Heading>
+              <form onSubmit={handlePetFormSubmit}>
+                <Field label="Nombre" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="name"
+                      value={petForm.name}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      autoComplete="off"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                    />
+                  </InputGroup>
+                  {petFormErrors.name && <Text color="red.500" fontSize="sm">{petFormErrors.name}</Text>}
+                </Field>
+                <Field label="Especie" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="species"
+                      value={petForm.species}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      autoComplete="off"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                    />
+                  </InputGroup>
+                  {petFormErrors.species && <Text color="red.500" fontSize="sm">{petFormErrors.species}</Text>}
+                </Field>
+                <Field label="Raza" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="breed"
+                      value={petForm.breed}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      autoComplete="off"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                    />
+                  </InputGroup>
+                  {petFormErrors.breed && <Text color="red.500" fontSize="sm">{petFormErrors.breed}</Text>}
+                </Field>
+                <Field label="Cumpleaños" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="birthDate"
+                      type="date"
+                      value={petForm.birthDate}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                      max={new Date().toISOString().split('T')[0]}
+                    />
+                  </InputGroup>
+                  {petFormErrors.birthDate && <Text color="red.500" fontSize="sm">{petFormErrors.birthDate}
+                  </Text>}
+                </Field>
+                <Field label="Descripción" mb={2}>
+                  <InputGroup>
+                    <textarea
+                      name="description"
+                      value={petForm.description}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      rows={2}
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                    />
+                  </InputGroup>
+                  {petFormErrors.description && <Text color="red.500" fontSize="sm">{petFormErrors.description}</Text>}
+                </Field>
+                <Field label="Imagen" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                    />
+                  </InputGroup>
+                  {petFormErrors.image && <Text color="red.500" fontSize="sm">{petFormErrors.image}</Text>}
+                </Field>
+                <Field label="Estado" mb={2}>
+                  <InputGroup>
+                    <select
+                      name="status"
+                      value={petForm.status}
+                      onChange={handlePetFormChange}
+                      className="chakra-input"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+                    >
+                      <option value="available">Disponible</option>
+                      <option value="reserved">En proceso de adopción</option>
+                      <option value="lost">Perdida</option>
+                    </select>
+                  </InputGroup>
+                  {petFormErrors.status && <Text color="red.500" fontSize="sm">{petFormErrors.status}</Text>}
+                </Field>
+                {petForm.status === 'lost' && (
+                  <Field label="Última vez vista" mb={2}>
+                    <InputGroup>
+                      <input
+                        name="lastSeen"
+                        value={petForm.lastSeen}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        autoComplete="off"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      />
+                    </InputGroup>
+                    {petFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{petFormErrors.lastSeen}</Text>}
+                  </Field>
+                )}
+                {petForm.status === 'reserved' && (
+                  <Field label="Fecha de inicio del proceso" mb={2}>
+                    <InputGroup>
+                      <input
+                        name="reservedAt"
+                        type="date"
+                        value={petForm.reservedAt}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      />
+                    </InputGroup>
+                    {petFormErrors.reservedAt && <Text color="red.500" fontSize="sm">{petFormErrors.reservedAt}</Text>}
+                  </Field>
+                )}
+                <Box mt={4} display="flex" gap={2}>
+                  <Button colorScheme="brand" type="submit">Guardar</Button>
+                  <Button variant="ghost" onClick={() => setShowPetModal(false)}>Cancelar</Button>
+                </Box>
+              </form>
+            </Box>
+          </Box>
+        )}
         {pets.length === 0 ? (
           <Text color="gray.500">No tienes mascotas registradas.</Text>
         ) : (
-          <SimpleGrid columns={{ base: 1, sm: 2 }} gap={6}>
-            {pets.map((pet) => (
-              <Box
-                key={pet.id}
-                bg="pastelBlue.100"
-                borderRadius="md"
-                boxShadow="md"
-                p={4}
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-              >
-                <img src={pet.image} alt={pet.name} style={{ width: '100%', borderRadius: '8px', marginBottom: 8 }} />
-                <Heading size="sm" mb={1}>{pet.name}</Heading>
-                <Text fontSize="sm" color="gray.600">{pet.breed}</Text>
-                <Text fontSize="sm" color="gray.600">Edad: {pet.age} años</Text>
-                <Button mt={3} colorScheme="brand" size="sm" w="full">
-                  Ver detalles
-                </Button>
-              </Box>
-            ))}
+          <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
+            {pets.map((pet) => {
+              const birth = new Date(pet.birthDate);
+              const now = new Date();
+              let ageText = "";
+
+              const years = now.getFullYear() - birth.getFullYear();
+              const months = now.getMonth() - birth.getMonth() + years * 12;
+              const days = Math.floor((now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+
+              if (years > 0) {
+                ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
+              } else if (months > 0) {
+                ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
+              } else {
+                ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
+              }
+
+              return (
+                <Box
+                  key={pet.id}
+                  bg="white"
+                  borderRadius="md"
+                  boxShadow="md"
+                  overflow="hidden"
+                  _hover={{ boxShadow: 'xl' }}
+                  maxW="250px"
+                  w="100%"
+                  mx="auto"
+                  p={0}
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                >
+                  <Box w="full" h="200px" bg="gray.50">
+                    <img
+                      src={pet.image}
+                      alt={pet.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        borderRadius: '0',
+                        display: 'block',
+                      }}
+                    />
+                  </Box>
+                  <Box p={4} w="full">
+                    <Heading size="sm" mb={1} color="brand.600">
+                      {pet.name}
+                    </Heading>
+                    <Text fontSize="sm" color="gray.600">
+                      {pet.breed}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {ageText}
+                    </Text>
+                    <Button mt={3} colorScheme="brand" size="sm" w="full">
+                      Ver detalles
+                    </Button>
+                  </Box>
+                </Box>
+              );
+            })}
           </SimpleGrid>
         )}
       </Box>
