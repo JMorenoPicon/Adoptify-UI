@@ -62,7 +62,7 @@ const PetDetail: React.FC = () => {
   const [editFormErrors, setEditFormErrors] = useState<{ [k: string]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
-  const [comments, setComments] = useState<{ _id: string; user: { username: string }; text: string; createdAt: string }[]>([]);
+  const [comments, setComments] = useState<{ _id: string; author: { username: string }; content: string; createdAt: string }[]>([]);
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
 
@@ -71,7 +71,7 @@ const PetDetail: React.FC = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
     axios
-      .get(`${API_URL}/pets/${petId}/comments`, {
+      .get(`${API_URL}/comments/${petId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(res => setComments(res.data))
@@ -104,8 +104,8 @@ const PetDetail: React.FC = () => {
     const token = localStorage.getItem('token');
     try {
       const res = await axios.post(
-        `${API_URL}/pets/${petId}/comments`,
-        { text: newComment },
+        `${API_URL}/comments/${petId}`,
+        { content: newComment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setComments(prev => [res.data, ...prev]);
@@ -458,74 +458,73 @@ const PetDetail: React.FC = () => {
         <Toaster />
       </Box>
       {/* Comentarios flotantes */}
+      <Box
+        maxW="md"
+        mx="auto"
+        mt={6}
+        mb={10}
+        p={0}
+        position="relative"
+        zIndex={1}
+        display="flex"
+        flexDirection="column"
+        alignItems="stretch"
+      >
         <Box
-          maxW="md"
-          mx="auto"
-          mt={6}
-          mb={10}
-          p={0}
-          position="relative"
-          zIndex={1}
+          bg="white"
+          borderRadius="md"
+          boxShadow="lg"
+          p={4}
+          w="100%"
+          minH="200px"
           display="flex"
           flexDirection="column"
-          alignItems="stretch"
+          gap={3}
         >
-          <Box
-            bg="white"
-            borderRadius="md"
-            boxShadow="lg"
-            p={4}
-            w="100%"
-            minH="200px"
-            display="flex"
-            flexDirection="column"
-            gap={3}
-          >
-            <Heading size="sm" mb={3}>Comentarios</Heading>
-            <form onSubmit={handleAddComment} style={{ marginBottom: 12 }}>
-              <InputGroup mb={2}>
-                <Input
-                  placeholder="Escribe un comentario..."
-                  value={newComment}
-                  onChange={e => setNewComment(e.target.value)}
-                  disabled={commentLoading}
-                  bg="pastelBlue.100"
-                />
-              </InputGroup>
-              <Button
-                colorScheme="brand"
-                type="submit"
-                loading={commentLoading}
-                disabled={!newComment.trim()}
+          <Heading size="sm" mb={3}>Comentarios</Heading>
+          <form onSubmit={handleAddComment} style={{ marginBottom: 12 }}>
+            <InputGroup mb={2}>
+              <Input
+                placeholder="Escribe un comentario..."
+                value={newComment}
+                onChange={e => setNewComment(e.target.value)}
+                disabled={commentLoading}
+                bg="pastelBlue.100"
+              />
+            </InputGroup>
+            <Button
+              colorScheme="brand"
+              type="submit"
+              loading={commentLoading}
+              disabled={!newComment.trim()}
+            >
+              Comentar
+            </Button>
+          </form>
+          <Box mt={2} display="flex" flexDirection="column" gap={2}>
+            {comments.length === 0 && (
+              <Text color="gray.500" fontSize="sm">No hay comentarios aún.</Text>
+            )}
+            {comments.map(comment => (
+              <Box
+                key={comment._id}
+                bg="white"
+                borderRadius="lg"
+                boxShadow="sm"
+                px={3}
+                py={2}
+                maxW="80%"
+                border="1px solid"
+                borderColor="pastelBlue.100"
               >
-                Comentar
-              </Button>
-            </form>
-            <Box mt={2} display="flex" flexDirection="column" gap={2}>
-              {comments.length === 0 && (
-                <Text color="gray.500" fontSize="sm">No hay comentarios aún.</Text>
-              )}
-              {comments.map(comment => (
-                <Box
-                  key={comment._id}
-                  alignSelf={comment.user?.username === 'TU_USUARIO' ? 'flex-end' : 'flex-start'}
-                  bg="white"
-                  borderRadius="lg"
-                  boxShadow="sm"
-                  px={3}
-                  py={2}
-                  maxW="80%"
-                  border="1px solid"
-                  borderColor="pastelBlue.100"
-                >
-                  <Text fontWeight="bold" fontSize="sm" mb={1}>{comment.user?.username || 'Usuario'}</Text>
-                  <Text fontSize="sm">{comment.text}</Text>
-                  <Text fontSize="xs" color="gray.500" mt={1}>{new Date(comment.createdAt).toLocaleString()}</Text>
-                </Box>
-              ))}
-            </Box>
+                <Text fontWeight="bold" fontSize="sm" mb={1}>{comment.author?.username || 'Usuario'}</Text>
+                <Text fontSize="sm">{comment.content}</Text>
+                <Text fontSize="xs" color="gray.500" mt={1}>{new Date(comment.createdAt).toLocaleString()}</Text>
+              </Box>
+            ))}
           </Box>
         </Box>
+      </Box>
     </Box>
   );
 };
