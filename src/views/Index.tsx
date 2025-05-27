@@ -154,7 +154,7 @@ const Index: React.FC = () => {
             <Spinner />
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-              {adoptablePets.map(({ id, name, breed, birthDate, image }) => {
+              {adoptablePets.map(({ _id, name, breed, birthDate, image }) => {
                 const birth = new Date(birthDate);
                 const now = new Date();
                 let ageText = "";
@@ -176,7 +176,7 @@ const Index: React.FC = () => {
 
                 return (
                   <Box
-                    key={id}
+                    key={_id}
                     bg="white"
                     borderRadius="md"
                     boxShadow="md"
@@ -200,7 +200,12 @@ const Index: React.FC = () => {
                       <Text fontSize="sm" color="gray.600">
                         {ageText}
                       </Text>
-                      <Button mt={3} colorScheme="brand" size="sm" w="full">
+                      <Button mt={3}
+                        colorScheme="brand"
+                        size="sm"
+                        w="full"
+                        onClick={() => navigate(`/pets/${_id}`)}
+                      >
                         Ver detalles
                       </Button>
                     </Box>
@@ -221,7 +226,7 @@ const Index: React.FC = () => {
             <Spinner />
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-              {lostPets.map(({ id, name, breed, birthDate, image }) => {
+              {lostPets.map(({ _id, name, breed, birthDate, image }) => {
                 const birth = new Date(birthDate);
                 const now = new Date();
                 let ageText = "";
@@ -243,7 +248,7 @@ const Index: React.FC = () => {
 
                 return (
                   <Box
-                    key={id}
+                    key={_id}
                     bg="white"
                     borderRadius="md"
                     boxShadow="md"
@@ -267,7 +272,13 @@ const Index: React.FC = () => {
                       <Text fontSize="sm" color="gray.600">
                         {ageText}
                       </Text>
-                      <Button mt={3} colorScheme="brand" size="sm" w="full">
+                      <Button
+                        mt={3}
+                        colorScheme="brand"
+                        size="sm"
+                        w="full"
+                        onClick={() => navigate(`/pets/${_id}`)}
+                      >
                         Ver detalles
                       </Button>
                     </Box>

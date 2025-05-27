@@ -62,6 +62,7 @@ const Login: React.FC = () => {
         description: 'Has iniciado sesión satisfactoriamente.',
         type: 'success',
       });
+      await new Promise(resolve => setTimeout(resolve, 3000));
       navigate('/index');
     } catch (err: unknown) {
       let msg = 'Error en la autenticación';

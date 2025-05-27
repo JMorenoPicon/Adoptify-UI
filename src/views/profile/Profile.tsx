@@ -20,6 +20,7 @@ import { Field } from '@/components/ui/field';
 import { InputGroup } from '@/components/ui/input-group';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const initialPetForm = {
   name: '',
@@ -53,6 +54,7 @@ interface Pet {
 }
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +226,7 @@ const Profile: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       toaster.create({ title: 'Mascota eliminada', type: 'success' });
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Recarga mascotas
       const petsRes = await axios.get(`${API_URL}/pets/mine`, { headers: { Authorization: `Bearer ${token}` } });
       setPets(petsRes.data);
@@ -543,7 +546,12 @@ const Profile: React.FC = () => {
                     <Text fontSize="sm" color="gray.600">
                       {ageText}
                     </Text>
-                    <Button mt={3} colorScheme="brand" size="sm" w="full">
+                    <Button mt={3}
+                      colorScheme="brand"
+                      size="sm"
+                      w="full"
+                      onClick={() => navigate(`/pets/${pet._id }`)}
+                    >
                       Ver detalles
                     </Button>
                     <Button
