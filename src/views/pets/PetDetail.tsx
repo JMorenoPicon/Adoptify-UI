@@ -20,6 +20,7 @@ import { InputGroup } from '@/components/ui/input-group';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useColorModeValue } from '@/components/ui/color-mode';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
@@ -60,6 +61,8 @@ const PetDetail: React.FC = () => {
   const [editForm, setEditForm] = useState<typeof initialEditForm>(initialEditForm);
   const [editFormErrors, setEditFormErrors] = useState<{ [k: string]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bg = useColorModeValue('pastelBlue.50', 'gray.800');
+
 
   // Obtener datos de la mascota y del usuario logueado
   useEffect(() => {
@@ -179,7 +182,7 @@ const PetDetail: React.FC = () => {
         birthDate: editForm.birthDate,
         description: editForm.description,
         // Solo envía image si hay una nueva imagen
-      ...(imageBase64 ? { image: imageBase64 } : {}),
+        ...(imageBase64 ? { image: imageBase64 } : {}),
         status: editForm.status,
         lastSeen: editForm.status === 'lost' ? editForm.lastSeen : undefined,
         reservedAt: editForm.status === 'reserved' ? editForm.reservedAt : undefined,
@@ -210,212 +213,214 @@ const PetDetail: React.FC = () => {
       : pet.owner._id === userId);
 
   return (
-    <Box maxW="md" mx="auto" mt={10} p={6} bg="white" borderRadius="md" boxShadow="md">
-      <Button mb={4} onClick={() => navigate(-1)} colorScheme="brand">
-        Volver
-      </Button>
-      <Box display="flex" flexDirection="column" alignItems="center">
-        <img
-          src={pet.image}
-          alt={pet.name}
-          style={{
-            width: '100%',
-            maxWidth: 300,
-            height: 200,
-            objectFit: 'contain',
-            borderRadius: 8,
-            marginBottom: 16,
-          }}
-        />
-        <Heading size="lg" mb={2}>{pet.name}</Heading>
-        <Text><strong>Especie:</strong> {pet.species}</Text>
-        <Text><strong>Raza:</strong> {pet.breed}</Text>
-        <Text><strong>Cumpleaños:</strong> {new Date(pet.birthDate).toLocaleDateString()}</Text>
-        <Text><strong>Edad:</strong> {getAgeText(pet.birthDate)}</Text>
-        <Text><strong>Descripción:</strong> {pet.description}</Text>
-        <Text><strong>Estado:</strong> {pet.status === 'available' ? 'Disponible' : pet.status === 'reserved' ? 'En proceso de adopción' : 'Perdida'}</Text>
-        {pet.status === 'reserved' && pet.reservedAt && (
-          <Text><strong>Fecha de inicio del proceso:</strong> {new Date(pet.reservedAt).toLocaleDateString()}</Text>
-        )}
-        {pet.status === 'lost' && pet.lastSeen && (
-          <Text><strong>Última vez vista:</strong> {pet.lastSeen}</Text>
-        )}
-        {isOwner && (
-          <Box mt={6} display="flex" gap={3}>
-            <Button colorScheme="brand" onClick={openEditModal}>
-              Actualizar mascota
-            </Button>
-            <Button colorScheme="red" onClick={() => setShowDeleteModal(true)}>
-              Eliminar mascota
-            </Button>
-          </Box>
-        )}
-      </Box>
-
-      {/* Modal de confirmación de borrado */}
-      <DialogRoot open={showDeleteModal} onOpenChange={d => setShowDeleteModal(d.open)}>
-        <DialogContent>
-          <DialogHeader>Eliminar mascota</DialogHeader>
-          <DialogBody>
-            ¿Seguro que quieres eliminar a <strong>{pet?.name}</strong>? Esta acción no se puede deshacer.
-          </DialogBody>
-          <DialogFooter>
-            <Button colorScheme="red" mr={3} onClick={handleDelete}>
-              Eliminar
-            </Button>
-            <DialogCloseTrigger asChild>
-              <Button variant="ghost"
-                bg="brand.500"
-                color="white"
-                _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
-                onClick={() => setShowDeleteModal(false)}>
-                Cancelar
+    <Box minH="100vh" bg={bg}>
+      <Box maxW="md" mx="auto" mt={10} p={6} bg={'white'} borderRadius="md" boxShadow="md">
+        <Button mb={4} onClick={() => navigate(-1)} colorScheme="brand">
+          Volver
+        </Button>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <img
+            src={pet.image}
+            alt={pet.name}
+            style={{
+              width: '100%',
+              maxWidth: 300,
+              height: 200,
+              objectFit: 'contain',
+              borderRadius: 8,
+              marginBottom: 16,
+            }}
+          />
+          <Heading size="lg" mb={2}>{pet.name}</Heading>
+          <Text><strong>Especie:</strong> {pet.species}</Text>
+          <Text><strong>Raza:</strong> {pet.breed}</Text>
+          <Text><strong>Cumpleaños:</strong> {new Date(pet.birthDate).toLocaleDateString()}</Text>
+          <Text><strong>Edad:</strong> {getAgeText(pet.birthDate)}</Text>
+          <Text><strong>Descripción:</strong> {pet.description}</Text>
+          <Text><strong>Estado:</strong> {pet.status === 'available' ? 'Disponible' : pet.status === 'reserved' ? 'En proceso de adopción' : 'Perdida'}</Text>
+          {pet.status === 'reserved' && pet.reservedAt && (
+            <Text><strong>Fecha de inicio del proceso:</strong> {new Date(pet.reservedAt).toLocaleDateString()}</Text>
+          )}
+          {pet.status === 'lost' && pet.lastSeen && (
+            <Text><strong>Última vez vista:</strong> {pet.lastSeen}</Text>
+          )}
+          {isOwner && (
+            <Box mt={6} display="flex" gap={3}>
+              <Button colorScheme="brand" onClick={openEditModal}>
+                Actualizar mascota
               </Button>
-            </DialogCloseTrigger>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
+              <Button colorScheme="red" onClick={() => setShowDeleteModal(true)}>
+                Eliminar mascota
+              </Button>
+            </Box>
+          )}
+        </Box>
 
-      {/* Modal de edición */}
-      <DialogRoot open={showEditModal} onOpenChange={d => setShowEditModal(d.open)}>
-        <DialogContent>
-          <DialogHeader>Actualizar mascota</DialogHeader>
-          <DialogBody>
-            <form id="edit-pet-form" onSubmit={handleEditFormSubmit}>
-              <Field label="Nombre" mb={2}>
-                <InputGroup>
-                  <Input
-                    name="name"
-                    value={editForm.name}
-                    onChange={handleEditFormChange}
-                    autoComplete="off"
-                  />
-                </InputGroup>
-                {editFormErrors.name && <Text color="red.500" fontSize="sm">{editFormErrors.name}</Text>}
-              </Field>
-              <Field label="Especie" mb={2}>
-                <InputGroup>
-                  <Input
-                    name="species"
-                    value={editForm.species}
-                    onChange={handleEditFormChange}
-                    autoComplete="off"
-                  />
-                </InputGroup>
-                {editFormErrors.species && <Text color="red.500" fontSize="sm">{editFormErrors.species}</Text>}
-              </Field>
-              <Field label="Raza" mb={2}>
-                <InputGroup>
-                  <Input
-                    name="breed"
-                    value={editForm.breed}
-                    onChange={handleEditFormChange}
-                    autoComplete="off"
-                  />
-                </InputGroup>
-                {editFormErrors.breed && <Text color="red.500" fontSize="sm">{editFormErrors.breed}</Text>}
-              </Field>
-              <Field label="Cumpleaños" mb={2}>
-                <InputGroup>
-                  <Input
-                    name="birthDate"
-                    type="date"
-                    value={editForm.birthDate}
-                    onChange={handleEditFormChange}
-                    max={new Date().toISOString().split('T')[0]}
-                  />
-                </InputGroup>
-                {editFormErrors.birthDate && <Text color="red.500" fontSize="sm">{editFormErrors.birthDate}</Text>}
-              </Field>
-              <Field label="Descripción" mb={2}>
-                <InputGroup>
-                  <textarea
-                    name="description"
-                    value={editForm.description}
-                    onChange={handleEditFormChange}
-                    className="chakra-input"
-                    rows={2}
-                    style={{ background: 'white', border: '1px solid #ccc' }}
+        {/* Modal de confirmación de borrado */}
+        <DialogRoot open={showDeleteModal} onOpenChange={d => setShowDeleteModal(d.open)}>
+          <DialogContent>
+            <DialogHeader>Eliminar mascota</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar a <strong>{pet?.name}</strong>? Esta acción no se puede deshacer.
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="red" mr={3} onClick={handleDelete}>
+                Eliminar
+              </Button>
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost"
+                  bg="brand.500"
+                  color="white"
+                  _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                  onClick={() => setShowDeleteModal(false)}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
 
-                  />
-                </InputGroup>
-                {editFormErrors.description && <Text color="red.500" fontSize="sm">{editFormErrors.description}</Text>}
-              </Field>
-              <Field label="Imagen (deja vacío para no cambiar)" mb={2}>
-                <InputGroup>
-                  <input
-                    name="image"
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleEditFormChange}
-                    className="chakra-input"
-                  />
-                </InputGroup>
-              </Field>
-              <Field label="Estado" mb={2}>
-                <InputGroup>
-                  <select
-                    name="status"
-                    value={editForm.status}
-                    onChange={handleEditFormChange}
-                    className="chakra-input"
-                    style={{ background: 'white', border: '1px solid #ccc' }}
-
-                  >
-                    <option value="available">Disponible</option>
-                    <option value="reserved">En proceso de adopción</option>
-                    <option value="lost">Perdida</option>
-                  </select>
-                </InputGroup>
-                {editFormErrors.status && <Text color="red.500" fontSize="sm">{editFormErrors.status}</Text>}
-              </Field>
-              {editForm.status === 'lost' && (
-                <Field label="Última vez vista" mb={2}>
+        {/* Modal de edición */}
+        <DialogRoot open={showEditModal} onOpenChange={d => setShowEditModal(d.open)}>
+          <DialogContent>
+            <DialogHeader>Actualizar mascota</DialogHeader>
+            <DialogBody>
+              <form id="edit-pet-form" onSubmit={handleEditFormSubmit}>
+                <Field label="Nombre" mb={2}>
                   <InputGroup>
                     <Input
-                      name="lastSeen"
-                      value={editForm.lastSeen}
+                      name="name"
+                      value={editForm.name}
                       onChange={handleEditFormChange}
                       autoComplete="off"
                     />
                   </InputGroup>
-                  {editFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{editFormErrors.lastSeen}</Text>}
+                  {editFormErrors.name && <Text color="red.500" fontSize="sm">{editFormErrors.name}</Text>}
                 </Field>
-              )}
-              {editForm.status === 'reserved' && (
-                <Field label="Fecha de inicio del proceso" mb={2}>
+                <Field label="Especie" mb={2}>
                   <InputGroup>
                     <Input
-                      name="reservedAt"
+                      name="species"
+                      value={editForm.species}
+                      onChange={handleEditFormChange}
+                      autoComplete="off"
+                    />
+                  </InputGroup>
+                  {editFormErrors.species && <Text color="red.500" fontSize="sm">{editFormErrors.species}</Text>}
+                </Field>
+                <Field label="Raza" mb={2}>
+                  <InputGroup>
+                    <Input
+                      name="breed"
+                      value={editForm.breed}
+                      onChange={handleEditFormChange}
+                      autoComplete="off"
+                    />
+                  </InputGroup>
+                  {editFormErrors.breed && <Text color="red.500" fontSize="sm">{editFormErrors.breed}</Text>}
+                </Field>
+                <Field label="Cumpleaños" mb={2}>
+                  <InputGroup>
+                    <Input
+                      name="birthDate"
                       type="date"
-                      value={editForm.reservedAt}
+                      value={editForm.birthDate}
                       onChange={handleEditFormChange}
                       max={new Date().toISOString().split('T')[0]}
                     />
                   </InputGroup>
-                  {editFormErrors.reservedAt && <Text color="red.500" fontSize="sm">{editFormErrors.reservedAt}</Text>}
+                  {editFormErrors.birthDate && <Text color="red.500" fontSize="sm">{editFormErrors.birthDate}</Text>}
                 </Field>
-              )}
-            </form>
-          </DialogBody>
-          <DialogFooter>
-            <Button colorScheme="brand" type="submit" form="edit-pet-form">
-              Guardar cambios
-            </Button>
-            <DialogCloseTrigger asChild>
-              <Button variant="ghost"
-                bg="brand.500"
-                color="white"
-                _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
-                onClick={() => setShowEditModal(false)}>
-                Cancelar
+                <Field label="Descripción" mb={2}>
+                  <InputGroup>
+                    <textarea
+                      name="description"
+                      value={editForm.description}
+                      onChange={handleEditFormChange}
+                      className="chakra-input"
+                      rows={2}
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+
+                    />
+                  </InputGroup>
+                  {editFormErrors.description && <Text color="red.500" fontSize="sm">{editFormErrors.description}</Text>}
+                </Field>
+                <Field label="Imagen (deja vacío para no cambiar)" mb={2}>
+                  <InputGroup>
+                    <input
+                      name="image"
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={handleEditFormChange}
+                      className="chakra-input"
+                    />
+                  </InputGroup>
+                </Field>
+                <Field label="Estado" mb={2}>
+                  <InputGroup>
+                    <select
+                      name="status"
+                      value={editForm.status}
+                      onChange={handleEditFormChange}
+                      className="chakra-input"
+                      style={{ background: 'white', border: '1px solid #ccc' }}
+
+                    >
+                      <option value="available">Disponible</option>
+                      <option value="reserved">En proceso de adopción</option>
+                      <option value="lost">Perdida</option>
+                    </select>
+                  </InputGroup>
+                  {editFormErrors.status && <Text color="red.500" fontSize="sm">{editFormErrors.status}</Text>}
+                </Field>
+                {editForm.status === 'lost' && (
+                  <Field label="Última vez vista" mb={2}>
+                    <InputGroup>
+                      <Input
+                        name="lastSeen"
+                        value={editForm.lastSeen}
+                        onChange={handleEditFormChange}
+                        autoComplete="off"
+                      />
+                    </InputGroup>
+                    {editFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{editFormErrors.lastSeen}</Text>}
+                  </Field>
+                )}
+                {editForm.status === 'reserved' && (
+                  <Field label="Fecha de inicio del proceso" mb={2}>
+                    <InputGroup>
+                      <Input
+                        name="reservedAt"
+                        type="date"
+                        value={editForm.reservedAt}
+                        onChange={handleEditFormChange}
+                        max={new Date().toISOString().split('T')[0]}
+                      />
+                    </InputGroup>
+                    {editFormErrors.reservedAt && <Text color="red.500" fontSize="sm">{editFormErrors.reservedAt}</Text>}
+                  </Field>
+                )}
+              </form>
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="brand" type="submit" form="edit-pet-form">
+                Guardar cambios
               </Button>
-            </DialogCloseTrigger>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
-      <Toaster />
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost"
+                  bg="brand.500"
+                  color="white"
+                  _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                  onClick={() => setShowEditModal(false)}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+        <Toaster />
+      </Box>
     </Box>
   );
 };
