@@ -21,6 +21,9 @@ import { toaster, Toaster } from '@/components/ui/toaster';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useColorModeValue } from '@/components/ui/color-mode';
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from '@/components/ui/menu';
+import { FiMoreVertical, FiEdit2, FiTrash2 } from 'react-icons/fi';
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
 
@@ -62,9 +65,16 @@ const PetDetail: React.FC = () => {
   const [editFormErrors, setEditFormErrors] = useState<{ [k: string]: string }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
-  const [comments, setComments] = useState<{ _id: string; author: { username: string }; content: string; createdAt: string }[]>([]);
+  const [comments, setComments] = useState<{ _id: string; author: { _id: string; username: string }; content: string; createdAt: string }[]>([]);
   const [newComment, setNewComment] = useState('');
   const [commentLoading, setCommentLoading] = useState(false);
+  const [editingComment, setEditingComment] = useState<{ _id: string; content: string } | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [commentToDelete, setCommentToDelete] = useState<{ _id: string; content: string } | null>(null);
+
+
 
   // Obtener comentarios de la mascota
   useEffect(() => {
@@ -115,6 +125,61 @@ const PetDetail: React.FC = () => {
       toaster.create({ title: 'Error al comentar', type: 'error' });
     } finally {
       setCommentLoading(false);
+    }
+  };
+
+  // Editar comentario
+  const handleEditComment = (comment: { _id: string; content: string }) => {
+    setEditingComment(comment);
+    setEditContent(comment.content);
+  };
+
+  const handleEditCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingComment || !editContent.trim()) return;
+    setEditLoading(true);
+    const token = localStorage.getItem('token');
+    try {
+      const res = await axios.put(
+        `${API_URL}/comments/${petId}/${editingComment._id}`,
+        { content: editContent },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setComments(prev =>
+        prev.map(c => (c._id === editingComment._id ? res.data : c))
+      );
+      toaster.create({ title: 'Comentario editado', type: 'success' });
+      setEditingComment(null);
+      setEditContent('');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toaster.create({ title: err.response?.data?.message || 'Error al editar', type: 'error' });
+      } else {
+        toaster.create({ title: 'Error al editar', type: 'error' });
+      }
+    }
+  };
+
+  // Borrar comentario
+  const handleDeleteComment = async () => {
+    if (!commentToDelete) return;
+    setDeleteLoading(commentToDelete._id);
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`${API_URL}/comments/${petId}/${commentToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setComments(prev => prev.filter(c => c._id !== commentToDelete._id));
+      toaster.create({ title: 'Comentario eliminado', type: 'success' });
+      setCommentToDelete(null);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toaster.create({ title: err.response?.data?.message || 'Error al eliminar', type: 'error' });
+      } else {
+        toaster.create({ title: 'Error al eliminar', type: 'error' });
+      }
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -440,7 +505,12 @@ const PetDetail: React.FC = () => {
               </form>
             </DialogBody>
             <DialogFooter>
-              <Button colorScheme="brand" type="submit" form="edit-pet-form">
+              <Button
+                colorScheme="brand"
+                type="submit"
+                loading={editLoading}
+                disabled={!editContent.trim()}
+              >
                 Guardar cambios
               </Button>
               <DialogCloseTrigger asChild>
@@ -453,6 +523,65 @@ const PetDetail: React.FC = () => {
                 </Button>
               </DialogCloseTrigger>
             </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Modal de confirmacion de eliminacion de comentario */}
+        <DialogRoot open={!!commentToDelete} onOpenChange={d => !d.open && setCommentToDelete(null)}>
+          <DialogContent>
+            <DialogHeader>Eliminar comentario</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar este comentario?
+              <Box mt={2} p={2} bg="gray.50" borderRadius="md">
+                <Text fontSize="sm">{commentToDelete?.content}</Text>
+              </Box>
+            </DialogBody>
+            <DialogFooter>
+              <Button
+                colorScheme="red"
+                mr={3}
+                onClick={handleDeleteComment}
+                loading={deleteLoading === commentToDelete?._id}
+              >
+                Eliminar
+              </Button>
+              <DialogCloseTrigger asChild>
+                <Button
+                  variant="ghost"
+                  bg="brand.500"
+                  color="white"
+                  _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                  onClick={() => setCommentToDelete(null)}
+                >
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+        {/* Modal de edicion de comentario */}
+        <DialogRoot open={!!editingComment} onOpenChange={d => !d.open && setEditingComment(null)}>
+          <DialogContent>
+            <DialogHeader>Editar comentario</DialogHeader>
+            <DialogBody>
+              <form onSubmit={handleEditCommentSubmit}>
+                <InputGroup mb={2}>
+                  <Input
+                    value={editContent}
+                    onChange={e => setEditContent(e.target.value)}
+                    autoFocus
+                  />
+                </InputGroup>
+                <Button
+                  colorScheme="brand"
+                  type="submit"
+                  loading={editLoading}
+                  disabled={!editContent.trim()}
+                >
+                  Guardar cambios
+                </Button>
+              </form>
+            </DialogBody>
           </DialogContent>
         </DialogRoot>
         <Toaster />
@@ -516,7 +645,33 @@ const PetDetail: React.FC = () => {
                 maxW="80%"
                 border="1px solid"
                 borderColor="pastelBlue.100"
+                position="relative"
               >
+                {comment.author?._id === userId && (
+                  <Box position="absolute" top={2} right={2} zIndex={2}>
+                    <MenuRoot>
+                      <MenuTrigger asChild>
+                        <Button variant="ghost" size="xs" p={1} minW={0}>
+                          <FiMoreVertical />
+                        </Button>
+                      </MenuTrigger>
+                      <MenuContent>
+                        <MenuItem value="edit" onClick={() => handleEditComment(comment)}>
+                          <FiEdit2 style={{ marginRight: 8 }} />
+                          Editar
+                        </MenuItem>
+                        <MenuItem
+                          value="delete"
+                          onClick={() => setCommentToDelete(comment)}
+                          disabled={deleteLoading === comment._id}
+                        >
+                          <FiTrash2 style={{ marginRight: 8 }} />
+                          {deleteLoading === comment._id ? 'Borrando...' : 'Borrar'}
+                        </MenuItem>
+                      </MenuContent>
+                    </MenuRoot>
+                  </Box>
+                )}
                 <Text fontWeight="bold" fontSize="sm" mb={1}>{comment.author?.username || 'Usuario'}</Text>
                 <Text fontSize="sm">{comment.content}</Text>
                 <Text fontSize="xs" color="gray.500" mt={1}>{new Date(comment.createdAt).toLocaleString()}</Text>
