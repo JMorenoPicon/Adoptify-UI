@@ -15,6 +15,7 @@ import News1 from './views/news/News1';
 import News2 from './views/news/News2';
 import News3 from './views/news/News3';
 import Profile from './views/profile/Profile';
+import PetDetail from '@/views/pets/PetDetail';
 
 const NoNavBarRoutes = [
   '/',
@@ -77,6 +78,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pets/:petId"
+          element={
+            <ProtectedRoute>
+              <PetDetail />
             </ProtectedRoute>
           }
         />
