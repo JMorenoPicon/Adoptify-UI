@@ -72,6 +72,15 @@ const Navbar: React.FC = () => {
             Animales en adopción
           </Button>
         </RouterLink>
+        <RouterLink to="/lost">
+          <Button
+            variant="ghost"
+            _hover={{ bg: 'pastelBlue.50' }}
+            color="gray.600"
+          >
+            Mascotas perdidas
+          </Button>
+        </RouterLink>
       </HStack>
 
       {/* Icono de usuario y cerrar sesión */}
