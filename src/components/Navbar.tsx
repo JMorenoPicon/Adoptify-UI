@@ -63,7 +63,15 @@ const Navbar: React.FC = () => {
             Inicio
           </Button>
         </RouterLink>
-        {/* Añade más enlaces aquí: boton para adopcion y para reportes de mascotas perdidas */}
+        <RouterLink to="/adopt">
+          <Button
+            variant="ghost"
+            _hover={{ bg: 'pastelBlue.50' }}
+            color="gray.600"
+          >
+            Animales en adopción
+          </Button>
+        </RouterLink>
       </HStack>
 
       {/* Icono de usuario y cerrar sesión */}
@@ -77,18 +85,18 @@ const Navbar: React.FC = () => {
         >
           <FiUser />
         </IconButton>
-      <IconButton
-        aria-label="Cerrar sesión"
-        variant="ghost"
-        color="brand.500"
-        _hover={{ bg: 'pastelBlue.50', color: 'brand.600' }}
-        onClick={handleLogout}
-      >
-      <FiLogOut />
-      </IconButton>
+        <IconButton
+          aria-label="Cerrar sesión"
+          variant="ghost"
+          color="brand.500"
+          _hover={{ bg: 'pastelBlue.50', color: 'brand.600' }}
+          onClick={handleLogout}
+        >
+          <FiLogOut />
+        </IconButton>
       </HStack>
     </Flex>
-)
+  )
 };
 
 export default Navbar
