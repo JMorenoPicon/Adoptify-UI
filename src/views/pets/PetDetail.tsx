@@ -394,7 +394,7 @@ const PetDetail: React.FC = () => {
           {/* Modal de edición */}
           <DialogRoot open={showEditModal} onOpenChange={d => setShowEditModal(d.open)}>
             <DialogContent>
-              <DialogHeader>Actualizar mascota</DialogHeader>
+              <DialogHeader fontWeight="bold">Actualizar mascota</DialogHeader>
               <DialogBody>
                 <form id="edit-pet-form" onSubmit={handleEditFormSubmit}>
                   <Field label="Nombre" mb={2}>
