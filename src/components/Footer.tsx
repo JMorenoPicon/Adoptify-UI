@@ -12,11 +12,17 @@ const Footer: React.FC = () => {
       as="footer"
       bg={bgColor}
       color={textColor}
-      py={4}
+      h='64px'
+      minH='64px'
+      py={0}
       textAlign="center"
       position="relative"
-      bottom={0}
-      width="full"
+      width="100vw"
+      zIndex={10}
+      boxShadow="0 -2px 8px rgba(0,0,0,0.04)"
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
     >
       <Text fontSize="sm" mb={1}>
         &copy; {new Date().getFullYear()} Pet Finder. Todos los derechos reservados.

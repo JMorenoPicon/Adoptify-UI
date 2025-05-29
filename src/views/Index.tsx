@@ -100,7 +100,7 @@ const Index: React.FC = () => {
       pb={16}
       px={4}
     >
-      <Box w="full" maxW="container.xl" mb={12}>
+      <Box w="full" maxW="container.xl">
         <Heading mb={4} textAlign="center" color="brand.600">
           Bienvenido a Pet Finder
         </Heading>

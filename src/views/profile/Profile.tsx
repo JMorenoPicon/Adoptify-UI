@@ -6,6 +6,7 @@ import {
   Button,
   SimpleGrid,
   Spinner,
+  Flex,
 } from '@chakra-ui/react';
 import {
   DialogRoot,
@@ -238,363 +239,368 @@ const Profile: React.FC = () => {
   if (loading) return <Spinner />;
 
   return (
-    <Box maxW="container.md" mx="auto" mt={10} p={6} bg={bg} borderRadius="md" boxShadow="md">
-      <Heading mb={6}>Mi Perfil</Heading>
-      {/* Sección datos usuario */}
-      <Box mb={8}>
-        <Heading size="md" mb={4}>Datos de usuario</Heading>
-        {editMode ? (
-          <Box as="form" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-            <Field label="Usuario" mb={3}>
-              <InputGroup>
-                <input
-                  name="username"
-                  value={form.username}
-                  onChange={handleChange}
-                  className="chakra-input"
-                  autoComplete="off"
-                  style={{ background: 'white', border: '1px solid #ccc' }}
-                />
-              </InputGroup>
-              {errors.username && (
-                <Text color="red.500" fontSize="sm" mt={1}>{errors.username}</Text>
-              )}
-            </Field>
-            <Field label="Email" mb={3}>
-              <InputGroup>
-                <input
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="chakra-input"
-                  autoComplete="off"
-                  style={{ background: 'white', border: '1px solid #ccc' }}
-                />
-              </InputGroup>
-              {errors.email && (
-                <Text color="red.500" fontSize="sm" mt={1}>{errors.email}</Text>
-              )}
-            </Field>
-            <Field label="Contraseña actual" mb={3}>
-              <InputGroup>
-                <input
-                  name="currentPassword"
-                  type="password"
-                  value={form.currentPassword}
-                  onChange={handleChange}
-                  className="chakra-input"
-                  autoComplete="current-password"
-                  style={{ background: 'white', border: '1px solid #ccc' }}
-                  required
-                />
-              </InputGroup>
-              {errors.currentPassword && (
-                <Text color="red.500" fontSize="sm" mt={1}>{errors.currentPassword}</Text>
-              )}
-            </Field>
-            <Field label="Nueva contraseña" mb={3}>
-              <InputGroup>
-                <input
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  className="chakra-input"
-                  autoComplete="new-password"
-                  style={{ background: 'white', border: '1px solid #ccc' }}
-                />
-              </InputGroup>
-              {errors.password && (
-                <Text color="red.500" fontSize="sm" mt={1}>{errors.password}</Text>
-              )}
-            </Field>
-            <Button colorScheme="brand" type="submit" mr={2}>Guardar</Button>
-            <Button variant="ghost"
-              bg="brand.500"
-              color="white"
-              _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
-              onClick={() => setEditMode(false)}>Cancelar</Button>
-          </Box>
-        ) : (
-          <Box>
-            <Text><strong>Usuario:</strong> {user?.username}</Text>
-            <Text><strong>Email:</strong> {user?.email}</Text>
-            <Button mt={4} colorScheme="brand" onClick={handleEdit}>Editar perfil</Button>
-          </Box>
-        )}
-      </Box>
-      {/* Sección mascotas */}
-      <Box>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
-          <Heading size="md">Mis mascotas</Heading>
-          <Button colorScheme="brand" size="sm" onClick={() => setShowPetModal(true)}>
-            Añadir mascota
-          </Button>
+    <Flex
+      direction="column"
+      minH="100vh"
+      bg={bg}
+      align="center"
+      pt={16}
+      pb={16}
+      px={4}
+    >
+      <Box maxW="container.md" mx="auto" mt={10} p={6} bg={'white'} borderRadius="md" boxShadow="md">
+        <Heading mb={6}>Mi Perfil</Heading>
+        {/* Sección datos usuario */}
+        <Box mb={8}>
+          <Heading size="md" mb={4}>Datos de usuario</Heading>
+          {editMode ? (
+            <Box as="form" onSubmit={e => { e.preventDefault(); handleSave(); }}>
+              <Field label="Usuario" mb={3}>
+                <InputGroup>
+                  <input
+                    name="username"
+                    value={form.username}
+                    onChange={handleChange}
+                    className="chakra-input"
+                    autoComplete="off"
+                    style={{ background: 'white', border: '1px solid #ccc' }}
+                  />
+                </InputGroup>
+                {errors.username && (
+                  <Text color="red.500" fontSize="sm" mt={1}>{errors.username}</Text>
+                )}
+              </Field>
+              <Field label="Email" mb={3}>
+                <InputGroup>
+                  <input
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="chakra-input"
+                    autoComplete="off"
+                    style={{ background: 'white', border: '1px solid #ccc' }}
+                  />
+                </InputGroup>
+                {errors.email && (
+                  <Text color="red.500" fontSize="sm" mt={1}>{errors.email}</Text>
+                )}
+              </Field>
+              <Field label="Contraseña actual" mb={3}>
+                <InputGroup>
+                  <input
+                    name="currentPassword"
+                    type="password"
+                    value={form.currentPassword}
+                    onChange={handleChange}
+                    className="chakra-input"
+                    autoComplete="current-password"
+                    style={{ background: 'white', border: '1px solid #ccc' }}
+                    required
+                  />
+                </InputGroup>
+                {errors.currentPassword && (
+                  <Text color="red.500" fontSize="sm" mt={1}>{errors.currentPassword}</Text>
+                )}
+              </Field>
+              <Field label="Nueva contraseña" mb={3}>
+                <InputGroup>
+                  <input
+                    name="password"
+                    type="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="chakra-input"
+                    autoComplete="new-password"
+                    style={{ background: 'white', border: '1px solid #ccc' }}
+                  />
+                </InputGroup>
+                {errors.password && (
+                  <Text color="red.500" fontSize="sm" mt={1}>{errors.password}</Text>
+                )}
+              </Field>
+              <Button colorScheme="brand" type="submit" mr={2}>Guardar</Button>
+              <Button variant="ghost"
+                bg="brand.500"
+                color="white"
+                _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                onClick={() => setEditMode(false)}>Cancelar</Button>
+            </Box>
+          ) : (
+            <Box>
+              <Text><strong>Usuario:</strong> {user?.username}</Text>
+              <Text><strong>Email:</strong> {user?.email}</Text>
+              <Button mt={4} colorScheme="brand" onClick={handleEdit}>Editar perfil</Button>
+            </Box>
+          )}
         </Box>
-        {/* Modal para añadir mascota */}
-        {showPetModal && (
-          <Box
-            pos="fixed"
-            top={0}
-            left={0}
-            w="100vw"
-            h="100vh"
-            bg="blackAlpha.600"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            zIndex={1000}
-          >
-            <Box bg="white" p={6} borderRadius="md" minW="350px" maxW="90vw">
-              <Heading size="md" mb={4}>Registrar nueva mascota</Heading>
-              <form onSubmit={handlePetFormSubmit}>
-                <Field label="Nombre" mb={2}>
-                  <InputGroup>
-                    <input
-                      name="name"
-                      value={petForm.name}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      autoComplete="off"
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                    />
-                  </InputGroup>
-                  {petFormErrors.name && <Text color="red.500" fontSize="sm">{petFormErrors.name}</Text>}
-                </Field>
-                <Field label="Especie" mb={2}>
-                  <InputGroup>
-                    <input
-                      name="species"
-                      value={petForm.species}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      autoComplete="off"
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                    />
-                  </InputGroup>
-                  {petFormErrors.species && <Text color="red.500" fontSize="sm">{petFormErrors.species}</Text>}
-                </Field>
-                <Field label="Raza" mb={2}>
-                  <InputGroup>
-                    <input
-                      name="breed"
-                      value={petForm.breed}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      autoComplete="off"
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                    />
-                  </InputGroup>
-                  {petFormErrors.breed && <Text color="red.500" fontSize="sm">{petFormErrors.breed}</Text>}
-                </Field>
-                <Field label="Cumpleaños" mb={2}>
-                  <InputGroup>
-                    <input
-                      name="birthDate"
-                      type="date"
-                      value={petForm.birthDate}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                      max={new Date().toISOString().split('T')[0]}
-                    />
-                  </InputGroup>
-                  {petFormErrors.birthDate && <Text color="red.500" fontSize="sm">{petFormErrors.birthDate}
-                  </Text>}
-                </Field>
-                <Field label="Descripción" mb={2}>
-                  <InputGroup>
-                    <textarea
-                      name="description"
-                      value={petForm.description}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      rows={2}
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                    />
-                  </InputGroup>
-                  {petFormErrors.description && <Text color="red.500" fontSize="sm">{petFormErrors.description}</Text>}
-                </Field>
-                <Field label="Imagen" mb={2}>
-                  <InputGroup>
-                    <input
-                      name="image"
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                    />
-                  </InputGroup>
-                  {petFormErrors.image && <Text color="red.500" fontSize="sm">{petFormErrors.image}</Text>}
-                </Field>
-                <Field label="Estado" mb={2}>
-                  <InputGroup>
-                    <select
-                      name="status"
-                      value={petForm.status}
-                      onChange={handlePetFormChange}
-                      className="chakra-input"
-                      style={{ background: 'white', border: '1px solid #ccc' }}
-                    >
-                      <option value="available">Disponible</option>
-                      <option value="reserved">En proceso de adopción</option>
-                      <option value="lost">Perdida</option>
-                    </select>
-                  </InputGroup>
-                  {petFormErrors.status && <Text color="red.500" fontSize="sm">{petFormErrors.status}</Text>}
-                </Field>
-                {petForm.status === 'lost' && (
-                  <Field label="Última vez vista" mb={2}>
+        {/* Sección mascotas */}
+        <Box>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={4}>
+            <Heading size="md">Mis mascotas</Heading>
+            <Button colorScheme="brand" size="sm" onClick={() => setShowPetModal(true)}>
+              Añadir mascota
+            </Button>
+          </Box>
+          {/* Modal para añadir mascota */}
+          <DialogRoot open={showPetModal} onOpenChange={d => setShowPetModal(d.open)}>
+            <DialogContent>
+              <DialogHeader fontWeight="bold">Registrar nueva mascota</DialogHeader>
+              <DialogBody>
+                <form onSubmit={handlePetFormSubmit}>
+                  <Field label="Nombre" mb={2}>
                     <InputGroup>
                       <input
-                        name="lastSeen"
-                        value={petForm.lastSeen}
+                        name="name"
+                        value={petForm.name}
                         onChange={handlePetFormChange}
                         className="chakra-input"
                         autoComplete="off"
                         style={{ background: 'white', border: '1px solid #ccc' }}
                       />
                     </InputGroup>
-                    {petFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{petFormErrors.lastSeen}</Text>}
+                    {petFormErrors.name && <Text color="red.500" fontSize="sm">{petFormErrors.name}</Text>}
                   </Field>
-                )}
-                {petForm.status === 'reserved' && (
-                  <Field label="Fecha de inicio del proceso" mb={2}>
+                  <Field label="Especie" mb={2}>
                     <InputGroup>
                       <input
-                        name="reservedAt"
-                        type="date"
-                        value={petForm.reservedAt}
+                        name="species"
+                        value={petForm.species}
                         onChange={handlePetFormChange}
                         className="chakra-input"
+                        autoComplete="off"
                         style={{ background: 'white', border: '1px solid #ccc' }}
                       />
                     </InputGroup>
-                    {petFormErrors.reservedAt && <Text color="red.500" fontSize="sm">{petFormErrors.reservedAt}</Text>}
+                    {petFormErrors.species && <Text color="red.500" fontSize="sm">{petFormErrors.species}</Text>}
                   </Field>
-                )}
-                <Box mt={4} display="flex" gap={2}>
-                  <Button colorScheme="brand" type="submit">Guardar</Button>
-                  <Button variant="ghost"
-                    bg="brand.500"
-                    color="white"
-                    _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
-                    onClick={() => setShowPetModal(false)}>Cancelar</Button>
-                </Box>
-              </form>
-            </Box>
-          </Box>
-        )}
-        {pets.length === 0 ? (
-          <Text color="gray.500">No tienes mascotas registradas.</Text>
-        ) : (
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-            {pets.map((pet) => {
-              const birth = new Date(pet.birthDate);
-              const now = new Date();
-              let ageText = "";
+                  <Field label="Raza" mb={2}>
+                    <InputGroup>
+                      <input
+                        name="breed"
+                        value={petForm.breed}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        autoComplete="off"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      />
+                    </InputGroup>
+                    {petFormErrors.breed && <Text color="red.500" fontSize="sm">{petFormErrors.breed}</Text>}
+                  </Field>
+                  <Field label="Cumpleaños" mb={2}>
+                    <InputGroup>
+                      <input
+                        name="birthDate"
+                        type="date"
+                        value={petForm.birthDate}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                        max={new Date().toISOString().split('T')[0]}
+                        placeholder="aaaa-mm-dd"
+                      />
+                    </InputGroup>
+                    {petFormErrors.birthDate && <Text color="red.500" fontSize="sm">{petFormErrors.birthDate}</Text>}
+                  </Field>
+                  <Field label="Descripción" mb={2}>
+                    <InputGroup>
+                      <textarea
+                        name="description"
+                        value={petForm.description}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        rows={2}
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      />
+                    </InputGroup>
+                    {petFormErrors.description && <Text color="red.500" fontSize="sm">{petFormErrors.description}</Text>}
+                  </Field>
+                  <Field label="Imagen" mb={2}>
+                    <InputGroup>
+                      <input
+                        name="image"
+                        type="file"
+                        accept="image/*"
+                        ref={fileInputRef}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                      />
+                    </InputGroup>
+                    {petFormErrors.image && <Text color="red.500" fontSize="sm">{petFormErrors.image}</Text>}
+                  </Field>
+                  <Field label="Estado" mb={2}>
+                    <InputGroup>
+                      <select
+                        name="status"
+                        value={petForm.status}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      >
+                        <option value="available">Disponible</option>
+                        <option value="reserved">En proceso de adopción</option>
+                        <option value="lost">Perdida</option>
+                      </select>
+                    </InputGroup>
+                    {petFormErrors.status && <Text color="red.500" fontSize="sm">{petFormErrors.status}</Text>}
+                  </Field>
+                  {petForm.status === 'lost' && (
+                    <Field label="Última vez vista" mb={2}>
+                      <InputGroup>
+                        <input
+                          name="lastSeen"
+                          value={petForm.lastSeen}
+                          onChange={handlePetFormChange}
+                          className="chakra-input"
+                          autoComplete="off"
+                          style={{ background: 'white', border: '1px solid #ccc' }}
+                        />
+                      </InputGroup>
+                      {petFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{petFormErrors.lastSeen}</Text>}
+                    </Field>
+                  )}
+                  {petForm.status === 'reserved' && (
+                    <Field label="Fecha de inicio del proceso" mb={2}>
+                      <InputGroup>
+                        <input
+                          name="reservedAt"
+                          type="date"
+                          value={petForm.reservedAt}
+                          onChange={handlePetFormChange}
+                          className="chakra-input"
+                          style={{ background: 'white', border: '1px solid #ccc' }}
+                        />
+                      </InputGroup>
+                      {petFormErrors.reservedAt && <Text color="red.500" fontSize="sm">{petFormErrors.reservedAt}</Text>}
+                    </Field>
+                  )}
+                  <DialogFooter>
+                    <Button colorScheme="brand" type="submit">Guardar</Button>
+                    <DialogCloseTrigger asChild>
+                      <Button variant="ghost"
+                        bg="brand.500"
+                        color="white"
+                        _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                        onClick={() => setShowPetModal(false)}>
+                        Cancelar
+                      </Button>
+                    </DialogCloseTrigger>
+                  </DialogFooter>
+                </form>
+              </DialogBody>
+            </DialogContent>
+          </DialogRoot>
+          {pets.length === 0 ? (
+            <Text color="gray.500" >No tienes mascotas registradas.</Text>
+          ) : (
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
+              {pets.map((pet) => {
+                const birth = new Date(pet.birthDate);
+                const now = new Date();
+                let ageText = "";
 
-              const years = now.getFullYear() - birth.getFullYear();
-              const months = now.getMonth() - birth.getMonth() + years * 12;
-              const days = Math.floor((now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+                const years = now.getFullYear() - birth.getFullYear();
+                const months = now.getMonth() - birth.getMonth() + years * 12;
+                const days = Math.floor((now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
 
-              if (years > 0) {
-                ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
-              } else if (months > 0) {
-                ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
-              } else {
-                ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
-              }
+                if (years > 0) {
+                  ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
+                } else if (months > 0) {
+                  ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
+                } else {
+                  ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
+                }
 
-              return (
-                <Box
-                  key={pet._id}
-                  bg="white"
-                  borderRadius="md"
-                  boxShadow="md"
-                  overflow="hidden"
-                  _hover={{ boxShadow: 'xl' }}
-                  maxW="250px"
-                  w="100%"
-                  mx="auto"
-                  p={0}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <Box w="full" h="200px" bg="gray.50">
-                    <img
-                      src={pet.image}
-                      alt={pet.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        borderRadius: '0',
-                        display: 'block',
-                      }}
-                    />
+                return (
+                  <Box
+                    key={pet._id}
+                    bg="white"
+                    borderRadius="md"
+                    boxShadow="2xl"
+                    border='2px solid'
+                    borderColor="gray.200"
+                    overflow="hidden"
+                    _hover={{ boxShadow: 'dark-lg', borderColor: 'brand.500' }}
+                    maxW="250px"
+                    w="100%"
+                    mx="auto"
+                    p={0}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                  >
+                    <Box w="full" h="200px" bg="gray.50">
+                      <img
+                        src={pet.image}
+                        alt={pet.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          borderRadius: '0',
+                          display: 'block',
+                        }}
+                      />
+                    </Box>
+                    <Box p={4} w="full">
+                      <Heading size="sm" mb={1} color="brand.600">
+                        {pet.name}
+                      </Heading>
+                      <Text fontSize="sm" color="gray.600">
+                        {pet.breed}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {ageText}
+                      </Text>
+                      <Button mt={3}
+                        colorScheme="brand"
+                        size="sm"
+                        w="full"
+                        onClick={() => navigate(`/pets/${pet._id}`)}
+                      >
+                        Ver detalles
+                      </Button>
+                      <Button
+                        mt={2}
+                        colorScheme="red"
+                        size="sm"
+                        w="full"
+                        onClick={() => openDeleteModal(pet)}
+                      >
+                        Eliminar
+                      </Button>
+                    </Box>
                   </Box>
-                  <Box p={4} w="full">
-                    <Heading size="sm" mb={1} color="brand.600">
-                      {pet.name}
-                    </Heading>
-                    <Text fontSize="sm" color="gray.600">
-                      {pet.breed}
-                    </Text>
-                    <Text fontSize="sm" color="gray.600">
-                      {ageText}
-                    </Text>
-                    <Button mt={3}
-                      colorScheme="brand"
-                      size="sm"
-                      w="full"
-                      onClick={() => navigate(`/pets/${pet._id }`)}
-                    >
-                      Ver detalles
-                    </Button>
-                    <Button
-                      mt={2}
-                      colorScheme="red"
-                      size="sm"
-                      w="full"
-                      onClick={() => openDeleteModal(pet)}
-                    >
-                      Eliminar
-                    </Button>
-                  </Box>
-                </Box>
-              );
-            })}
-          </SimpleGrid>
-        )}
-      </Box>
-      <DialogRoot
-        open={deleteModalOpen} onOpenChange={details => setDeleteModalOpen(details.open)}>
-        <DialogContent>
-          <DialogHeader>Eliminar mascota</DialogHeader>
-          <DialogBody>
-            ¿Seguro que quieres eliminar a <strong>{petToDelete?.name}</strong>? Esta acción no se puede deshacer.
-          </DialogBody>
-          <DialogFooter>
-            <Button colorScheme="red" mr={3} onClick={confirmDeletePet}>
-              Eliminar
-            </Button>
-            <DialogCloseTrigger asChild>
-              <Button variant="ghost"
-                bg="brand.500"
-                color="white"
-                _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
-                onClick={closeDeleteModal}>
-                Cancelar
+                );
+              })}
+            </SimpleGrid>
+          )}
+        </Box>
+        <DialogRoot
+          open={deleteModalOpen} onOpenChange={details => setDeleteModalOpen(details.open)}>
+          <DialogContent>
+            <DialogHeader>Eliminar mascota</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar a <strong>{petToDelete?.name}</strong>? Esta acción no se puede deshacer.
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="red" mr={3} onClick={confirmDeletePet}>
+                Eliminar
               </Button>
-            </DialogCloseTrigger>
-          </DialogFooter>
-        </DialogContent>
-      </DialogRoot>
-      <Toaster />
-    </Box>
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost"
+                  bg="brand.500"
+                  color="white"
+                  _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                  onClick={closeDeleteModal}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+        <Toaster />
+      </Box>
+    </Flex>
   );
 };
 
