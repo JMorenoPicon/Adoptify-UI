@@ -16,6 +16,7 @@ import News2 from './views/news/News2';
 import News3 from './views/news/News3';
 import Profile from './views/profile/Profile';
 import PetDetail from '@/views/pets/PetDetail';
+import AdoptablePets from './views/AdoptablePets';
 
 const NoNavBarRoutes = [
   '/',
@@ -86,6 +87,14 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <PetDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/adopt"
+          element={
+            <ProtectedRoute>
+              <AdoptablePets />
             </ProtectedRoute>
           }
         />
