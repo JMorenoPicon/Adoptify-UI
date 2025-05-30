@@ -154,7 +154,7 @@ const Index: React.FC = () => {
             <Spinner />
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-              {adoptablePets.map(({ _id, name, breed, birthDate, image }) => {
+              {adoptablePets.map(({ _id, name, breed, birthDate, image, city }) => {
                 const birth = new Date(birthDate);
                 const now = new Date();
                 let ageText = "";
@@ -199,6 +199,9 @@ const Index: React.FC = () => {
                       </Text>
                       <Text fontSize="sm" color="gray.600">
                         {ageText}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Ciudad: {city}
                       </Text>
                       <Button mt={3}
                         colorScheme="brand"
@@ -226,7 +229,7 @@ const Index: React.FC = () => {
             <Spinner />
           ) : (
             <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-              {lostPets.map(({ _id, name, breed, birthDate, image }) => {
+              {lostPets.map(({ _id, name, breed, birthDate, image, city }) => {
                 const birth = new Date(birthDate);
                 const now = new Date();
                 let ageText = "";
@@ -271,6 +274,9 @@ const Index: React.FC = () => {
                       </Text>
                       <Text fontSize="sm" color="gray.600">
                         {ageText}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Ciudad: {city}
                       </Text>
                       <Button
                         mt={3}

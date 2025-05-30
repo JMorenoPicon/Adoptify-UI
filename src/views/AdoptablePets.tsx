@@ -19,6 +19,7 @@ interface Pet {
     name: string;
     species: string;
     breed: string;
+    city: string;
     birthDate: string;
     image: string;
     status: string;
@@ -40,6 +41,8 @@ const AdoptablePets: React.FC = () => {
     const [breed, setBreed] = useState('');
     const [age, setAge] = useState('');
     const [status, setStatus] = useState('');
+    const [city, setCity] = useState('');
+    const [cityOptions, setCityOptions] = useState<string[]>([]);
 
     // Opciones dinámicas
     const [speciesOptions, setSpeciesOptions] = useState<string[]>([]);
@@ -50,22 +53,42 @@ const AdoptablePets: React.FC = () => {
     ]);
 
     useEffect(() => {
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    setLoading(true);
-    axios
-        .get(`${API_URL}/pets/adoptable`, { headers })
-        .then(res => {
-            setPets(res.data);
-            setSpeciesOptions([...new Set(res.data.map((p: Pet) => p.species))] as string[]);
-            setBreedOptions([...new Set(res.data.map((p: Pet) => p.breed))] as string[]);
-        })
-        .catch(err => {
-            console.error('Error al cargar mascotas adoptables:', err);
-        })
-        .finally(() => setLoading(false));
-}, []);
+        setLoading(true);
+        axios
+            .get(`${API_URL}/pets/adoptable`, { headers })
+            .then(res => {
+                setPets(res.data);
+
+                // Agrupar especies ignorando mayúsculas/minúsculas y capitalizar
+                const uniqueSpecies = [
+                    ...new Set(res.data.map((p: Pet) => p.species.trim().toLowerCase()))
+                ] as string[];
+                setSpeciesOptions(
+                    uniqueSpecies.map(
+                        (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+                    )
+                );
+
+                // Agrupar razas ignorando mayúsculas/minúsculas y capitalizar
+                const uniqueBreeds = [
+                    ...new Set(res.data.map((p: Pet) => p.breed.trim().toLowerCase()))
+                ] as string[];
+                setBreedOptions(
+                    uniqueBreeds.map(
+                        (b: string) => b.charAt(0).toUpperCase() + b.slice(1)
+                    )
+                );
+
+                setCityOptions([...new Set(res.data.map((p: Pet) => p.city))] as string[]);
+            })
+            .catch(err => {
+                console.error('Error al cargar mascotas adoptables:', err);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     // Filtros aplicados
     const filteredPets = pets.filter(pet => {
@@ -73,10 +96,11 @@ const AdoptablePets: React.FC = () => {
         const now = new Date();
         const petAge = now.getFullYear() - birth.getFullYear();
         return (
-            (species ? pet.species === species : true) &&
-            (breed ? pet.breed === breed : true) &&
+            (species ? pet.species.trim().toLowerCase() === species.toLowerCase() : true) &&
+            (breed ? pet.breed.trim().toLowerCase() === breed.toLowerCase() : true) &&
             (status ? pet.status === status : true) &&
-            (age ? String(petAge) === age : true)
+            (age ? String(petAge) === age : true) &&
+            (city ? pet.city === city : true)
         );
     });
 
@@ -99,46 +123,54 @@ const AdoptablePets: React.FC = () => {
             <Box w="full" maxW="container.xl" mb={6}>
                 <Heading mb={4} textAlign="center" color="brand.600">
                     Animales en adopción
-                </Heading>                
+                </Heading>
                 <Box mb={6} display="flex" flexWrap="wrap" gap={4} justifyContent="center">
-                  <NativeSelectRoot>
-                    <NativeSelectField
-                      items={speciesOptions.map(opt => ({ value: opt, label: opt }))}
-                      value={species}
-                      onChange={e => setSpecies(e.target.value)}
-                      placeholder="Filtrar por especie"
-                    />
-                  </NativeSelectRoot>
-                  <NativeSelectRoot>
-                    <NativeSelectField
-                      items={breedOptions.map(opt => ({ value: opt, label: opt }))}
-                      value={breed}
-                      onChange={e => setBreed(e.target.value)}
-                      placeholder="Filtrar por raza"
-                    />
-                  </NativeSelectRoot>
-                  <NativeSelectRoot>
-                    <NativeSelectField
-                      items={ageOptions.map(opt => ({ value: opt, label: `${opt} años` }))}
-                      value={age}
-                      onChange={e => setAge(e.target.value)}
-                      placeholder="Filtrar por edad"
-                    />
-                  </NativeSelectRoot>
-                  <NativeSelectRoot>
-                    <NativeSelectField
-                      items={statusOptions}
-                      value={status}
-                      onChange={e => setStatus(e.target.value)}
-                      placeholder="Filtrar por estado"
-                    />
-                  </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={speciesOptions.map(opt => ({ value: opt, label: opt }))}
+                            value={species}
+                            onChange={e => setSpecies(e.target.value)}
+                            placeholder="Filtrar por especie"
+                        />
+                    </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={breedOptions.map(opt => ({ value: opt, label: opt }))}
+                            value={breed}
+                            onChange={e => setBreed(e.target.value)}
+                            placeholder="Filtrar por raza"
+                        />
+                    </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={ageOptions.map(opt => ({ value: opt, label: `${opt} años` }))}
+                            value={age}
+                            onChange={e => setAge(e.target.value)}
+                            placeholder="Filtrar por edad"
+                        />
+                    </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={cityOptions.map(opt => ({ value: opt, label: opt }))}
+                            value={city}
+                            onChange={e => setCity(e.target.value)}
+                            placeholder="Filtrar por ciudad"
+                        />
+                    </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={statusOptions}
+                            value={status}
+                            onChange={e => setStatus(e.target.value)}
+                            placeholder="Filtrar por estado"
+                        />
+                    </NativeSelectRoot>
                 </Box>
                 {loading ? (
                     <Spinner />
                 ) : (
                     <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-                        {filteredPets.map(({ _id, name, breed, birthDate, image, status }) => {
+                        {filteredPets.map(({ _id, name, breed, birthDate, image, status, city }) => {
                             const birth = new Date(birthDate);
                             const now = new Date();
                             let ageText = "";
@@ -180,6 +212,9 @@ const AdoptablePets: React.FC = () => {
                                         </Text>
                                         <Text fontSize="sm" color="gray.600">
                                             Estado: {status === 'available' ? 'Disponible' : 'En proceso de adopción'}
+                                        </Text>
+                                        <Text fontSize="sm" color="gray.600">
+                                            Ciudad: {city}
                                         </Text>
                                         <Button
                                             mt={3}

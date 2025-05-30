@@ -24,6 +24,7 @@ import axios from 'axios';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from '@/components/ui/menu';
 import { FiMoreVertical, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { citiesOfSpain } from '@/assets/cities';
 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
@@ -34,6 +35,7 @@ const initialEditForm = {
   breed: '',
   birthDate: '',
   description: '',
+  city: '',
   image: null as File | string | null,
   status: 'available',
   lastSeen: '',
@@ -47,6 +49,7 @@ interface Pet {
   breed: string;
   birthDate: string;
   description: string;
+  city: string;
   image: string;
   status: string;
   lastSeen?: string;
@@ -220,6 +223,7 @@ const PetDetail: React.FC = () => {
       breed: pet.breed,
       birthDate: pet.birthDate?.slice(0, 10) || '',
       description: pet.description,
+      city: pet.city || '',
       image: '', // No rellenar por seguridad, solo si se sube una nueva
       status: pet.status,
       lastSeen: pet.lastSeen || '',
@@ -238,6 +242,7 @@ const PetDetail: React.FC = () => {
     if (!editForm.birthDate) errs.birthDate = 'La fecha de nacimiento es obligatoria';
     else if (new Date(editForm.birthDate) > new Date()) errs.birthDate = 'La fecha no puede ser futura';
     if (!editForm.description) errs.description = 'La descripción es obligatoria';
+    if (!editForm.city) errs.city = 'La ciudad es obligatoria';
     if (editForm.status === 'lost' && !editForm.lastSeen) errs.lastSeen = 'Este campo es obligatorio';
     if (editForm.status === 'reserved' && !editForm.reservedAt) errs.reservedAt = 'Este campo es obligatorio';
     setEditFormErrors(errs);
@@ -283,6 +288,7 @@ const PetDetail: React.FC = () => {
         breed: editForm.breed,
         birthDate: editForm.birthDate,
         description: editForm.description,
+        city: editForm.city,
         // Solo envía image si hay una nueva imagen
         ...(imageBase64 ? { image: imageBase64 } : {}),
         status: editForm.status,
@@ -348,6 +354,7 @@ const PetDetail: React.FC = () => {
             <Text><strong>Cumpleaños:</strong> {new Date(pet.birthDate).toLocaleDateString()}</Text>
             <Text><strong>Edad:</strong> {getAgeText(pet.birthDate)}</Text>
             <Text><strong>Descripción:</strong> {pet.description}</Text>
+            <Text><strong>Ciudad:</strong> {pet.city}</Text>
             <Text><strong>Estado:</strong> {pet.status === 'available' ? 'Disponible' : pet.status === 'reserved' ? 'En proceso de adopción' : 'Perdida'}</Text>
             {pet.status === 'reserved' && pet.reservedAt && (
               <Text><strong>Fecha de inicio del proceso:</strong> {new Date(pet.reservedAt).toLocaleDateString()}</Text>
@@ -456,6 +463,24 @@ const PetDetail: React.FC = () => {
                     </InputGroup>
                     {editFormErrors.description && <Text color="red.500" fontSize="sm">{editFormErrors.description}</Text>}
                   </Field>
+                  <Field label="Ciudad" mb={2}>
+                    <InputGroup>
+                      <select
+                        name="city"
+                        value={editForm.city}
+                        onChange={handleEditFormChange}
+                        className="chakra-input"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                        required
+                      >
+                        <option value="">Selecciona una ciudad</option>
+                        {citiesOfSpain.slice().sort((a, b) => a.localeCompare(b, 'es')).map(city => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                    </InputGroup>
+                    {editFormErrors.city && <Text color="red.500" fontSize="sm">{editFormErrors.city}</Text>}
+                  </Field>
                   <Field label="Imagen (deja vacío para no cambiar)" mb={2}>
                     <InputGroup>
                       <input
@@ -518,8 +543,9 @@ const PetDetail: React.FC = () => {
                 <Button
                   colorScheme="brand"
                   type="submit"
+                  form='edit-pet-form'
                   loading={editLoading}
-                  disabled={!editContent.trim()}
+                  disabled={editLoading}
                 >
                   Guardar cambios
                 </Button>

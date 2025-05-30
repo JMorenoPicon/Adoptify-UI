@@ -22,6 +22,7 @@ import { InputGroup } from '@/components/ui/input-group';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { citiesOfSpain } from '@/assets/cities';
 
 const initialPetForm = {
   name: '',
@@ -29,6 +30,7 @@ const initialPetForm = {
   breed: '',
   birthDate: '',
   description: '',
+  city: '',
   image: null as File | null,
   status: 'available',
   lastSeen: '',
@@ -48,6 +50,7 @@ interface Pet {
   breed: string;
   birthDate: Date;
   age: number;
+  city: string;
   image: string;
   status?: string;
   lastSeen?: string;
@@ -172,6 +175,7 @@ const Profile: React.FC = () => {
     else if (new Date(petForm.birthDate) > new Date()) errs.birthDate = 'La fecha no puede ser futura';
     if (!petForm.birthDate) errs.birthDate = 'La fecha de nacimiento es obligatoria';
     if (!petForm.description) errs.description = 'La descripción es obligatoria';
+    if (!petForm.city) errs.city = 'La ciudad es obligatoria';
     if (!petForm.image) errs.image = 'La imagen es obligatoria';
     if (!petForm.status) errs.status = 'El estado es obligatorio';
     if (petForm.status === 'lost' && !petForm.lastSeen) errs.lastSeen = 'Este campo es obligatorio';
@@ -203,6 +207,7 @@ const Profile: React.FC = () => {
         breed: petForm.breed,
         birthDate: petForm.birthDate,
         description: petForm.description,
+        city: petForm.city,
         image: imageBase64,
         status: petForm.status === 'reserved' ? 'reserved' : petForm.status,
         lastSeen: petForm.status === 'lost' ? petForm.lastSeen : undefined,
@@ -414,6 +419,23 @@ const Profile: React.FC = () => {
                     </InputGroup>
                     {petFormErrors.description && <Text color="red.500" fontSize="sm">{petFormErrors.description}</Text>}
                   </Field>
+                  <Field label="Ciudad" mb={2}>
+                    <InputGroup>
+                      <select
+                        name="city"
+                        value={petForm.city}
+                        onChange={handlePetFormChange}
+                        className="chakra-input"
+                        style={{ background: 'white', border: '1px solid #ccc' }}
+                      >
+                        <option value="">Selecciona una ciudad</option>
+                        {citiesOfSpain.slice().sort((a, b) => a.localeCompare(b, 'es')).map(city => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                    </InputGroup>
+                    {petFormErrors.city && <Text color="red.500" fontSize="sm">{petFormErrors.city}</Text>}
+                  </Field>
                   <Field label="Imagen" mb={2}>
                     <InputGroup>
                       <input
@@ -550,6 +572,9 @@ const Profile: React.FC = () => {
                       </Text>
                       <Text fontSize="sm" color="gray.600">
                         {ageText}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Ciudad: {pet.city}
                       </Text>
                       <Button mt={3}
                         colorScheme="brand"
