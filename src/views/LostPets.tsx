@@ -20,9 +20,9 @@ interface Pet {
     species: string;
     breed: string;
     birthDate: string;
+    city: string;
     image: string;
     status: string;
-    lastSeen?: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
@@ -39,6 +39,8 @@ const LostPets: React.FC = () => {
     const [species, setSpecies] = useState('');
     const [breed, setBreed] = useState('');
     const [age, setAge] = useState('');
+    const [city, setCity] = useState('');
+    const [cityOptions, setCityOptions] = useState<string[]>([]);
 
     // Opciones dinámicas
     const [speciesOptions, setSpeciesOptions] = useState<string[]>([]);
@@ -53,8 +55,28 @@ const LostPets: React.FC = () => {
             .get(`${API_URL}/pets/lost`, { headers })
             .then(res => {
                 setPets(res.data);
-                setSpeciesOptions([...new Set(res.data.map((p: Pet) => p.species))] as string[]);
-                setBreedOptions([...new Set(res.data.map((p: Pet) => p.breed))] as string[]);
+
+                // Agrupar especies ignorando mayúsculas/minúsculas y capitalizar
+                const uniqueSpecies = [
+                    ...new Set(res.data.map((p: Pet) => p.species.trim().toLowerCase()))
+                ] as string[];
+                setSpeciesOptions(
+                    uniqueSpecies.map(
+                        (s) => s.charAt(0).toUpperCase() + s.slice(1)
+                    )
+                );
+
+                // Agrupar razas ignorando mayúsculas/minúsculas y capitalizar
+                const uniqueBreeds = [
+                    ...new Set(res.data.map((p: Pet) => p.breed.trim().toLowerCase()))
+                ] as string[];
+                setBreedOptions(
+                    uniqueBreeds.map(
+                        (b: string) => b.charAt(0).toUpperCase() + b.slice(1)
+                    )
+                );
+                // Opciones de ciudad
+                setCityOptions([...new Set(res.data.map((p: Pet) => p.city))] as string[]);
             })
             .catch(err => {
                 console.error('Error al cargar mascotas perdidas:', err);
@@ -68,9 +90,10 @@ const LostPets: React.FC = () => {
         const now = new Date();
         const petAge = now.getFullYear() - birth.getFullYear();
         return (
-            (species ? pet.species === species : true) &&
-            (breed ? pet.breed === breed : true) &&
-            (age ? String(petAge) === age : true)
+            (species ? pet.species.trim().toLowerCase() === species.toLowerCase() : true) &&
+            (breed ? pet.breed.trim().toLowerCase() === breed.toLowerCase() : true) &&
+            (age ? String(petAge) === age : true) &&
+            (city ? pet.city === city : true)
         );
     });
 
@@ -119,12 +142,20 @@ const LostPets: React.FC = () => {
                             placeholder="Filtrar por edad"
                         />
                     </NativeSelectRoot>
+                    <NativeSelectRoot>
+                        <NativeSelectField
+                            items={cityOptions.map(opt => ({ value: opt, label: opt }))}
+                            value={city}
+                            onChange={e => setCity(e.target.value)}
+                            placeholder="Filtrar por ciudad"
+                        />
+                    </NativeSelectRoot>
                 </Box>
                 {loading ? (
                     <Spinner />
                 ) : (
                     <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
-                        {filteredPets.map(({ _id, name, breed, birthDate, image, lastSeen }) => {
+                        {filteredPets.map(({ _id, name, breed, birthDate, image, city }) => {
                             const birth = new Date(birthDate);
                             const now = new Date();
                             let ageText = "";
@@ -164,11 +195,9 @@ const LostPets: React.FC = () => {
                                         <Text fontSize="sm" color="gray.600">
                                             {ageText}
                                         </Text>
-                                        {lastSeen && (
-                                            <Text fontSize="sm" color="gray.600">
-                                                Última vez vista: {lastSeen}
-                                            </Text>
-                                        )}
+                                        <Text fontSize="sm" color="gray.600">
+                                            Ciudad: {city}
+                                        </Text>
                                         <Button
                                             mt={3}
                                             colorScheme="brand"
