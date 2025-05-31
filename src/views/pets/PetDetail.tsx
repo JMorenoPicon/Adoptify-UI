@@ -56,6 +56,9 @@ interface Pet {
   city: string;
   image: string;
   status: string;
+  foundAt?: string;
+  foundLocationLat?: number;
+  foundLocationLng?: number;
   lastSeen?: string;
   reservedAt?: string;
   locationLat?: number;
@@ -84,6 +87,11 @@ const PetDetail: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [commentToDelete, setCommentToDelete] = useState<{ _id: string; content: string } | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showFoundModal, setShowFoundModal] = useState(false);
+  const [foundAt, setFoundAt] = useState('');
+  const [foundLocation, setFoundLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [foundErrors, setFoundErrors] = useState<{ [k: string]: string }>({});
+  const [foundLoading, setFoundLoading] = useState(false);
 
 
 
@@ -327,6 +335,41 @@ const PetDetail: React.FC = () => {
     }
   };
 
+  const handleFoundSubmit = async () => {
+      const errs: { [k: string]: string } = {};
+      if (!foundAt) errs.foundAt = 'La fecha es obligatoria';
+      if (!foundLocation || !foundLocation.lat || !foundLocation.lng) errs.foundLocation = 'Selecciona la ubicación';
+      setFoundErrors(errs);
+      if (Object.keys(errs).length > 0) return;
+
+      setFoundLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token || !pet) return;
+      try {
+        await axios.put(`${API_URL}/pets/${pet._id}/found`, {
+          foundAt,
+          foundLocationLat: foundLocation?.lat,
+          foundLocationLng: foundLocation?.lng,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+        toaster.create({ title: 'Mascota marcada como encontrada', type: 'success' });
+        setShowFoundModal(false);
+        setFoundAt('');
+        setFoundLocation(null);
+        setFoundErrors({});
+        setFoundLoading(false);
+        setLoading(true);
+        // Recarga datos
+        const res = await axios.get(`${API_URL}/pets/${petId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPet(res.data);
+        setLoading(false);
+      } catch {
+        toaster.create({ title: 'Error al actualizar', type: 'error' });
+        setFoundLoading(false);
+      }
+    };
+
   if (loading) return <Spinner />;
 
   if (!pet) return <Text>No se encontró la mascota.</Text>;
@@ -349,7 +392,12 @@ const PetDetail: React.FC = () => {
       px={4}
     >
       <Box minH="100vh" bg={bg}>
-        <Box maxW="md" mx="auto" mt={10} p={6} bg={'white'} borderRadius="md" boxShadow="md">
+        <Box maxW="md" mx="auto" mt={10} p={6} bg={'white'} borderRadius="md" boxShadow="md" >
+          {pet.status === 'found' && (
+            <Text color="green.700" fontWeight="bold" mb={2}>
+              Mascota encontrada y reunida con su dueño
+            </Text>
+          )}
           <Button mb={4} onClick={() => navigate(-1)} colorScheme="brand">
             Volver
           </Button>
@@ -373,7 +421,7 @@ const PetDetail: React.FC = () => {
             <Text><strong>Edad:</strong> {getAgeText(pet.birthDate)}</Text>
             <Text><strong>Descripción:</strong> {pet.description}</Text>
             <Text><strong>Ciudad:</strong> {pet.city}</Text>
-            <Text><strong>Estado:</strong> {pet.status === 'available' ? 'Disponible' : pet.status === 'reserved' ? 'En proceso de adopción' : 'Perdida'}</Text>
+            <Text><strong>Estado:</strong> {pet.status === 'available' ? 'Disponible' : pet.status === 'reserved' ? 'En proceso de adopción' : pet.status === 'lost' ? 'Perdida' : pet.status === 'found' ? 'Encontrada' : pet.status}</Text>
             {pet.status === 'reserved' && pet.reservedAt && (
               <Text><strong>Fecha de inicio del proceso:</strong> {new Date(pet.reservedAt).toLocaleDateString()}</Text>
             )}
@@ -392,6 +440,11 @@ const PetDetail: React.FC = () => {
                   (Solo lectura)
                 </Text>
               </Box>
+            )}
+            {isOwner && pet.status === 'lost' && (
+              <Button colorScheme="green" onClick={() => setShowFoundModal(true)}>
+                Mascota encontrada
+              </Button>
             )}
             {isOwner && (
               <Box mt={6} display="flex" gap={3}>
@@ -671,6 +724,50 @@ const PetDetail: React.FC = () => {
                   </Button>
                 </form>
               </DialogBody>
+            </DialogContent>
+          </DialogRoot>
+          <DialogRoot open={showFoundModal} onOpenChange={d => setShowFoundModal(d.open)}>
+            <DialogContent>
+              <DialogHeader fontWeight="bold">Registrar mascota encontrada</DialogHeader>
+              <DialogBody>
+                <Field label="Fecha en la que se encontró" mb={2}>
+                  <InputGroup>
+                    <Input
+                      type="date"
+                      value={foundAt}
+                      max={new Date().toISOString().split('T')[0]}
+                      onChange={e => setFoundAt(e.target.value)}
+                    />
+                  </InputGroup>
+                  {foundErrors.foundAt && <Text color="red.500" fontSize="sm">{foundErrors.foundAt}</Text>}
+                </Field>
+                <Field label="Ubicación donde se encontró" mb={2}>
+                  <Box w="100%">
+                    <MapPicker value={foundLocation} onChange={setFoundLocation} />
+                  </Box>
+                  {foundErrors.foundLocation && <Text color="red.500" fontSize="sm">{foundErrors.foundLocation}</Text>}
+                </Field>
+              </DialogBody>
+              <DialogFooter>
+                <Button
+                  colorScheme="green"
+                  onClick={handleFoundSubmit}
+                  loading={foundLoading}
+                >
+                  Guardar
+                </Button>
+                <DialogCloseTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    bg="brand.500"
+                    color="white"
+                    _hover={{ bg: "white", color: "brand.500", border: "1px solid", borderColor: "brand.500" }}
+                    onClick={() => setShowFoundModal(false)}
+                  >
+                    Cancelar
+                  </Button>
+                </DialogCloseTrigger>
+              </DialogFooter>
             </DialogContent>
           </DialogRoot>
           <Toaster />

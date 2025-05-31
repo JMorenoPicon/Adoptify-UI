@@ -568,6 +568,8 @@ const Profile: React.FC = () => {
                     display="flex"
                     flexDirection="column"
                     alignItems="center"
+                    opacity={pet.status === 'found' ? 0.5 : 1}
+                    position="relative"
                   >
                     <Box w="full" h="200px" bg="gray.50">
                       <img

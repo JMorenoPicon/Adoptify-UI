@@ -49,6 +49,9 @@ const Index: React.FC = () => {
   const [lostPets, setLostPets] = useState([]);
   const [loadingAdoptable, setLoadingAdoptable] = useState(true);
   const [loadingLost, setLoadingLost] = useState(true);
+  const [foundPets, setFoundPets] = useState([]);
+  const [loadingFound, setLoadingFound] = useState(true);
+
 
   const sliderSettings = {
     dots: true,
@@ -86,6 +89,17 @@ const Index: React.FC = () => {
       })
       .finally(() => {
         setLoadingLost(false);
+      });
+    // Cargar mascotas encontradas
+    axios.get(`${API_URL}/pets/found`, { headers })
+      .then(res => {
+        setFoundPets(res.data);
+      })
+      .catch(err => {
+        console.error('Error al cargar mascotas encontradas:', err);
+      })
+      .finally(() => {
+        setLoadingFound(false);
       });
   }, []);
 
@@ -252,6 +266,7 @@ const Index: React.FC = () => {
                 return (
                   <Box
                     key={_id}
+                    mb={12}
                     bg="white"
                     borderRadius="md"
                     boxShadow="md"
@@ -287,6 +302,97 @@ const Index: React.FC = () => {
                       >
                         Ver detalles
                       </Button>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </SimpleGrid>
+          )}
+        </Box>
+        {/* Avisos de mascotas encontradas */}
+        <Box mb={12}>
+          <Heading size="md" mb={6}>
+            Mascotas encontradas recientemente
+          </Heading>
+          {loadingFound ? (
+            <Spinner />
+          ) : foundPets.length === 0 ? (
+            <Text color="gray.500">No hay mascotas encontradas recientemente.</Text>
+          ) : (
+            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={6}>
+              {foundPets.map(({ _id, name, breed, birthDate, city, foundAt, image }) => {
+                const birth = new Date(birthDate);
+                const now = new Date();
+                let ageText = "";
+
+                const years = now.getFullYear() - birth.getFullYear();
+                const months = now.getMonth() - birth.getMonth() + years * 12;
+                const days = Math.floor((now.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (years > 0) {
+                  ageText = `Edad: ${years} año${years > 1 ? "s" : ""}`;
+                } else if (months > 0) {
+                  ageText = `Edad: ${months} mes${months > 1 ? "es" : ""}`;
+                } else {
+                  ageText = `Edad: ${days} día${days !== 1 ? "s" : ""}`;
+                }
+
+                return (
+                  <Box key={_id}>
+                    <Box
+                      mb={0}
+                      w="100%"
+                      bg="green.100"
+                      color="green.700"
+                      fontWeight="bold"
+                      fontSize="sm"
+                      p={2}
+                      textAlign="center"
+                      borderRadius="md"
+                    >
+                      Mascota encontrada y reunida con su dueño
+                    </Box>
+                    <Box
+                      bg="white"
+                      borderRadius="md"
+                      boxShadow="md"
+                      overflow="hidden"
+                      opacity={0.5}
+                      position="relative"
+                    >
+                      <Image
+                        src={image}
+                        alt={name}
+                        w="full"
+                        h="200px"
+                        objectFit="contain"
+                      />
+                      <Box p={4}>
+                        <Heading size="sm" mb={1} color="brand.600">
+                          {name}
+                        </Heading>
+                        <Text fontSize="sm" color="gray.600">
+                          {breed}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          {ageText}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Ciudad: {city}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Encontrada el: {foundAt ? new Date(foundAt).toLocaleDateString() : 'Desconocida'}
+                        </Text>
+                        <Button
+                          mt={3}
+                          colorScheme="brand"
+                          size="sm"
+                          w="full"
+                          onClick={() => navigate(`/pets/${_id}`)}
+                        >
+                          Ver detalles
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
                 );
