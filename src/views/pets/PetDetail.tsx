@@ -6,7 +6,8 @@ import {
   Spinner,
   Button,
   Input,
-  Flex
+  Flex,
+  Link
 } from '@chakra-ui/react';
 import {
   DialogRoot,
@@ -59,7 +60,7 @@ interface Pet {
   reservedAt?: string;
   locationLat?: number;
   locationLng?: number;
-  owner: { _id: string } | string;
+  owner: { _id: string; email?: string } | string;
 }
 
 const PetDetail: React.FC = () => {
@@ -400,6 +401,21 @@ const PetDetail: React.FC = () => {
                 <Button colorScheme="red" onClick={() => setShowDeleteModal(true)}>
                   Eliminar mascota
                 </Button>
+              </Box>
+            )}
+            {!isOwner && pet.owner && typeof pet.owner !== 'string' && pet.owner.email && (
+              <Box mt={6} display="flex" gap={3}>
+                <Link
+                  href={`mailto:${pet.owner.email}?subject=Consulta sobre tu mascota en Pet Finder`}
+                  colorScheme="brand"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  _hover={{ textDecoration: 'none' }}
+                >
+                  <Button colorScheme="brand" as="span">
+                    Contactar con el dueño
+                  </Button>
+                </Link>
               </Box>
             )}
           </Box>
