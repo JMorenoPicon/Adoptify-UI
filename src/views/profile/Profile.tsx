@@ -23,6 +23,7 @@ import { toaster, Toaster } from '@/components/ui/toaster';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { citiesOfSpain } from '@/assets/cities';
+import { MapPicker } from '@/components/maps/MapPicker';
 
 const initialPetForm = {
   name: '',
@@ -35,6 +36,8 @@ const initialPetForm = {
   status: 'available',
   lastSeen: '',
   reservedAt: '',
+  locationLat: undefined as number | undefined,
+  locationLng: undefined as number | undefined,
 };
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
@@ -50,11 +53,15 @@ interface Pet {
   breed: string;
   birthDate: Date;
   age: number;
+  description: string;
   city: string;
   image: string;
   status?: string;
   lastSeen?: string;
   reservedAt?: string;
+  locationLat?: number;
+  locationLng?: number;
+  owner: { _id: string } | string;
 }
 
 const Profile: React.FC = () => {
@@ -72,6 +79,7 @@ const Profile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const openDeleteModal = (pet: Pet) => {
     setPetToDelete(pet);
@@ -180,6 +188,7 @@ const Profile: React.FC = () => {
     if (!petForm.status) errs.status = 'El estado es obligatorio';
     if (petForm.status === 'lost' && !petForm.lastSeen) errs.lastSeen = 'Este campo es obligatorio';
     if (petForm.status === 'reserved' && !petForm.reservedAt) errs.reservedAt = 'Este campo es obligatorio';
+    if (petForm.status === 'lost' && (!location || !location.lat || !location.lng)) errs.location = 'Selecciona una ubicación en el mapa';
     setPetFormErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -212,9 +221,12 @@ const Profile: React.FC = () => {
         status: petForm.status === 'reserved' ? 'reserved' : petForm.status,
         lastSeen: petForm.status === 'lost' ? petForm.lastSeen : undefined,
         reservedAt: petForm.status === 'reserved' ? petForm.reservedAt : undefined,
+        locationLat: location?.lat,
+        locationLng: location?.lng,
       }, { headers: { Authorization: `Bearer ${token}` } });
       toaster.create({ title: 'Mascota registrada', type: 'success' });
       setShowPetModal(false);
+      setLocation(null);
       setPetForm(initialPetForm);
       // Recarga mascotas
       const petsRes = await axios.get(`${API_URL}/pets/mine`, { headers: { Authorization: `Bearer ${token}` } });
@@ -466,19 +478,26 @@ const Profile: React.FC = () => {
                     {petFormErrors.status && <Text color="red.500" fontSize="sm">{petFormErrors.status}</Text>}
                   </Field>
                   {petForm.status === 'lost' && (
-                    <Field label="Última vez vista" mb={2}>
-                      <InputGroup>
-                        <input
-                          name="lastSeen"
-                          value={petForm.lastSeen}
-                          onChange={handlePetFormChange}
-                          className="chakra-input"
-                          autoComplete="off"
-                          style={{ background: 'white', border: '1px solid #ccc' }}
-                        />
-                      </InputGroup>
-                      {petFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{petFormErrors.lastSeen}</Text>}
-                    </Field>
+                    <>
+                      <Field label="Última vez vista" mb={2}>
+                        <InputGroup>
+                          <input
+                            name="lastSeen"
+                            value={petForm.lastSeen}
+                            onChange={handlePetFormChange}
+                            className="chakra-input"
+                            autoComplete="off"
+                            style={{ background: 'white', border: '1px solid #ccc' }}
+                          />
+                        </InputGroup>
+                        {petFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{petFormErrors.lastSeen}</Text>}
+                      </Field>
+                      <Field label="Ubicación aproximada en el mapa" mb={2}>
+                        <Box w="100%">
+                          <MapPicker value={location} onChange={setLocation} />
+                        </Box>
+                      </Field>
+                    </>
                   )}
                   {petForm.status === 'reserved' && (
                     <Field label="Fecha de inicio del proceso" mb={2}>

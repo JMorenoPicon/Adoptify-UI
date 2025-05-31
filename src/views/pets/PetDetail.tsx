@@ -25,6 +25,7 @@ import { useColorModeValue } from '@/components/ui/color-mode';
 import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from '@/components/ui/menu';
 import { FiMoreVertical, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { citiesOfSpain } from '@/assets/cities';
+import { MapPicker } from '@/components/maps/MapPicker';
 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
@@ -40,6 +41,8 @@ const initialEditForm = {
   status: 'available',
   lastSeen: '',
   reservedAt: '',
+  locationLat: undefined as number | undefined,
+  locationLng: undefined as number | undefined,
 };
 
 interface Pet {
@@ -54,6 +57,8 @@ interface Pet {
   status: string;
   lastSeen?: string;
   reservedAt?: string;
+  locationLat?: number;
+  locationLng?: number;
   owner: { _id: string } | string;
 }
 
@@ -77,6 +82,7 @@ const PetDetail: React.FC = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [commentToDelete, setCommentToDelete] = useState<{ _id: string; content: string } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
 
 
 
@@ -228,7 +234,14 @@ const PetDetail: React.FC = () => {
       status: pet.status,
       lastSeen: pet.lastSeen || '',
       reservedAt: pet.reservedAt ? pet.reservedAt.slice(0, 10) : '',
+      locationLat: pet.locationLat,
+      locationLng: pet.locationLng,
     });
+    setLocation(
+      pet.locationLat && pet.locationLng
+        ? { lat: pet.locationLat, lng: pet.locationLng }
+        : null
+    );
     setEditFormErrors({});
     setShowEditModal(true);
   };
@@ -245,6 +258,7 @@ const PetDetail: React.FC = () => {
     if (!editForm.city) errs.city = 'La ciudad es obligatoria';
     if (editForm.status === 'lost' && !editForm.lastSeen) errs.lastSeen = 'Este campo es obligatorio';
     if (editForm.status === 'reserved' && !editForm.reservedAt) errs.reservedAt = 'Este campo es obligatorio';
+    if (editForm.status === 'lost' && (!location || !location.lat || !location.lng)) errs.location = 'Selecciona una ubicación en el mapa';
     setEditFormErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -294,10 +308,13 @@ const PetDetail: React.FC = () => {
         status: editForm.status,
         lastSeen: editForm.status === 'lost' ? editForm.lastSeen : undefined,
         reservedAt: editForm.status === 'reserved' ? editForm.reservedAt : undefined,
+        locationLat: location?.lat,
+        locationLng: location?.lng,
       }, { headers: { Authorization: `Bearer ${token}` } });
       toaster.create({ title: 'Mascota actualizada', type: 'success' });
       await new Promise(resolve => setTimeout(resolve, 3000));
       setShowEditModal(false);
+      setLocation(null);
       setLoading(true);
       const res = await axios.get(`${API_URL}/pets/${petId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -361,6 +378,19 @@ const PetDetail: React.FC = () => {
             )}
             {pet.status === 'lost' && pet.lastSeen && (
               <Text><strong>Última vez vista:</strong> {pet.lastSeen}</Text>
+            )}
+            {pet.locationLat && pet.locationLng && (
+              <Box w="100%" mt={4}>
+                <Heading size="sm" mb={2}>Ubicación aproximada</Heading>
+                <MapPicker
+                  value={{ lat: pet.locationLat, lng: pet.locationLng }}
+                  onChange={() => { }}
+                  enableGeolocate={false}
+                />
+                <Text fontSize="xs" color="gray.500" mt={1}>
+                  (Solo lectura)
+                </Text>
+              </Box>
             )}
             {isOwner && (
               <Box mt={6} display="flex" gap={3}>
@@ -511,17 +541,24 @@ const PetDetail: React.FC = () => {
                     {editFormErrors.status && <Text color="red.500" fontSize="sm">{editFormErrors.status}</Text>}
                   </Field>
                   {editForm.status === 'lost' && (
-                    <Field label="Última vez vista" mb={2}>
-                      <InputGroup>
-                        <Input
-                          name="lastSeen"
-                          value={editForm.lastSeen}
-                          onChange={handleEditFormChange}
-                          autoComplete="off"
-                        />
-                      </InputGroup>
-                      {editFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{editFormErrors.lastSeen}</Text>}
-                    </Field>
+                    <>
+                      <Field label="Última vez vista" mb={2}>
+                        <InputGroup>
+                          <Input
+                            name="lastSeen"
+                            value={editForm.lastSeen}
+                            onChange={handleEditFormChange}
+                            autoComplete="off"
+                          />
+                        </InputGroup>
+                        {editFormErrors.lastSeen && <Text color="red.500" fontSize="sm">{editFormErrors.lastSeen}</Text>}
+                      </Field>
+                      <Field label="Ubicación aproximada en el mapa" mb={2}>
+                        <Box w="100%">
+                          <MapPicker value={location} onChange={setLocation} />
+                        </Box>
+                      </Field>
+                    </>
                   )}
                   {editForm.status === 'reserved' && (
                     <Field label="Fecha de inicio del proceso" mb={2}>
