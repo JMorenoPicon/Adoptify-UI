@@ -11,12 +11,14 @@ import { Input, Button, Text } from '@chakra-ui/react';
 import axios from 'axios';
 import { toaster } from '@/components/ui/toaster';
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface VerifyCodeModalProps {
   open: boolean;
   onClose: () => void;
   email: string;
+  oldEmail?: string;
+  emailChange?: boolean;
   onSuccess?: () => void;
 }
 
@@ -24,6 +26,8 @@ export const VerifyCodeModal: React.FC<VerifyCodeModalProps> = ({
   open,
   onClose,
   email,
+  oldEmail,
+  emailChange,
   onSuccess,
 }) => {
   const [code, setCode] = useState('');
@@ -34,10 +38,21 @@ export const VerifyCodeModal: React.FC<VerifyCodeModalProps> = ({
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`${API_URL}/users/verify`, {
-        email,
-        verificationCode: code,
-      });
+      if (emailChange && oldEmail) {
+        // Verificación de cambio de email (enviando también el token)
+        await axios.post(`${API_URL}/users/verify-email-change`, {
+          oldEmail,
+          newEmail: email,
+          verificationCode: code,
+          token: code,
+        });
+      } else {
+        // Verificación normal (registro)
+        await axios.post(`${API_URL}/users/verify`, {
+          email,
+          verificationCode: code,
+        });
+      }
       toaster.create({ title: '¡Verificado!', type: 'success' });
       setCode('');
       onClose();
