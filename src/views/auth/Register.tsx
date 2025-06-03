@@ -14,6 +14,7 @@ import {
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import axios from 'axios';
 import { toaster, Toaster } from '@/components/ui/toaster';
+import { VerifyCodeModal } from '@/components/ui/verifyCodeModal';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { register as apiRegister } from '@/api/auth';
 
@@ -33,6 +34,9 @@ const Register: React.FC = () => {
   }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -52,17 +56,14 @@ const Register: React.FC = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { data } = await apiRegister({ username, email, password });
-      localStorage.setItem('token', data.token);
-      const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hora
-      localStorage.setItem('token_expires', expiresAt.toString());
+      await apiRegister({ username, email, password });
       toaster.create({
         title: '¡Registro exitoso!',
-        description: 'Ya puedes iniciar sesión.',
+        description: 'Revisa tu correo electrónico para verificar tu cuenta.',
         type: 'success',
       });
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      navigate('/auth/login');
+      setRegisteredEmail(email);
+      setShowVerifyModal(true);
     } catch (err: unknown) {
       let msg = `${err}`;
       if (axios.isAxiosError(err)) {
@@ -233,6 +234,17 @@ const Register: React.FC = () => {
       </Box>
 
       <Toaster />
+      <VerifyCodeModal
+        open={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        email={registeredEmail}
+        onSuccess={async () => {
+          setShowVerifyModal(false);
+          toaster.create({ title: 'Cuenta verificada', type: 'success' });
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          navigate('/auth/login');
+        }}
+      />
     </Flex>
   );
 };
