@@ -39,13 +39,21 @@ export const VerifyCodeModal: React.FC<VerifyCodeModalProps> = ({
     setError(null);
     try {
       if (emailChange && oldEmail) {
-        // Verificación de cambio de email (enviando también el token)
-        await axios.post(`${API_URL}/users/verify-email-change`, {
-          oldEmail,
-          newEmail: email,
-          verificationCode: code,
-          token: code,
-        });
+        // Verificación de cambio de email, enviando el token de sesión como header
+        const authToken = localStorage.getItem('token');
+        await axios.post(
+          `${API_URL}/users/verify-email-change`,
+          {
+            oldEmail,
+            newEmail: email,
+            verificationCode: code,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
       } else {
         // Verificación normal (registro)
         await axios.post(`${API_URL}/users/verify`, {
