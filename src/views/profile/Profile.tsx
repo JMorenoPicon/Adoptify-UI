@@ -24,6 +24,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { citiesOfSpain } from '@/assets/cities';
 import { MapPicker } from '@/components/maps/MapPicker';
+import { VerifyCodeModal } from '@/components/ui/verifyCodeModal';
 
 const initialPetForm = {
   name: '',
@@ -40,7 +41,7 @@ const initialPetForm = {
   locationLng: undefined as number | undefined,
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface User {
   username: string;
@@ -80,6 +81,8 @@ const Profile: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
 
   const openDeleteModal = (pet: Pet) => {
     setPetToDelete(pet);
@@ -137,6 +140,19 @@ const Profile: React.FC = () => {
     if (!(await validate())) return;
     const token = localStorage.getItem('token');
     try {
+      // Si el email ha cambiado
+      if (form.email !== user?.email) {
+        await axios.post(
+          `${API_URL}/users/request-email-change`,
+          { newEmail: form.email },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setPendingEmail(form.email);
+        setShowVerifyModal(true);
+        toaster.create({ title: 'Verifica tu nuevo email', type: 'info' });
+        return;
+      }
+      // Si no ha cambiado, actualiza normalmente
       await axios.put(
         `${API_URL}/users/profile`,
         {
@@ -150,7 +166,7 @@ const Profile: React.FC = () => {
       toaster.create({ title: 'Perfil actualizado', type: 'success' });
       setEditMode(false);
       setUser({ username: form.username, email: form.email });
-      setForm(f => ({ ...f, currentPassword: '', password: '' })); // Limpia contraseñas tras guardar
+      setForm(f => ({ ...f, currentPassword: '', password: '' }));
     } catch (err: unknown) {
       let msg = 'Error al actualizar';
       if (axios.isAxiosError(err)) {
@@ -646,6 +662,40 @@ const Profile: React.FC = () => {
         </DialogRoot>
         <Toaster />
       </Box>
+      <VerifyCodeModal
+        open={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        email={pendingEmail}
+        oldEmail={user?.email}
+        emailChange
+        onSuccess={async () => {
+          setShowVerifyModal(false);
+          // Ahora sí, actualiza el perfil con el nuevo email
+          const token = localStorage.getItem('token');
+          try {
+            await axios.put(
+              `${API_URL}/users/profile`,
+              {
+                username: form.username,
+                email: pendingEmail,
+                currentPassword: form.currentPassword,
+                password: form.password || undefined
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toaster.create({ title: 'Perfil actualizado', type: 'success' });
+            setEditMode(false);
+            setUser({ username: form.username, email: pendingEmail });
+            setForm(f => ({ ...f, currentPassword: '', password: '' }));
+          } catch (err: unknown) {
+            let msg = 'Error al actualizar';
+            if (axios.isAxiosError(err)) {
+              msg = (err.response?.data as { message?: string })?.message ?? msg;
+            }
+            toaster.create({ title: 'Error', description: msg, type: 'error' });
+          }
+        }}
+      />
     </Flex>
   );
 };

@@ -14,12 +14,18 @@ import axios from 'axios';
 import { toaster, Toaster } from '@/components/ui/toaster';
 import { Link as RouterLink } from 'react-router-dom';
 import { forgotPassword as apiForgotPassword } from '@/api/auth';
+import { ResetCodeModal } from '@/components/ui/resetCodeModal';
+import { ResetPasswordModal } from '@/components/ui/resetPasswordModal';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ email?: string; general?: string }>({});
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetCode, setResetCode] = useState('');
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -41,6 +47,8 @@ const ForgotPassword: React.FC = () => {
         type: 'success',
       });
       setSent(true);
+      setResetEmail(email);
+      setShowCodeModal(true);
     } catch (err: unknown) {
       let msg = 'Error al enviar el email';
       if (axios.isAxiosError(err)) {
@@ -84,10 +92,16 @@ const ForgotPassword: React.FC = () => {
           </Text>
         )}
 
-        {sent ? (
-          <Text color="accent.500" textAlign="center">
-            Revisa tu correo para el enlace de restablecimiento.
-          </Text>
+        {/* Mensaje tras restablecimiento exitoso */}
+        {sent && !showCodeModal && !showPasswordModal ? (
+            <Box>
+              <Text color="accent.500" textAlign="center" mb={2}>
+                Tu contraseña ha sido restablecida correctamente.
+              </Text>
+              <Text color="accent.500" textAlign="center">
+                Ya puedes iniciar sesión con tu nueva contraseña.
+              </Text>
+            </Box>
         ) : (
           <form onSubmit={handleSubmit}>
             <Field.Root invalid={!!errors.email} mb={6}>
@@ -124,6 +138,31 @@ const ForgotPassword: React.FC = () => {
           </Link>
         </Flex>
       </Box>
+
+      {/* MODAL: Código de verificación */}
+      <ResetCodeModal
+        open={showCodeModal}
+        onClose={() => setShowCodeModal(false)}
+        email={resetEmail}
+        onSuccess={code => {
+          setResetCode(code);
+          setShowCodeModal(false);
+          setShowPasswordModal(true);
+        }}
+      />
+
+      {/* MODAL: Nueva contraseña */}
+      <ResetPasswordModal
+        open={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+        email={resetEmail}
+        code={resetCode}
+        onSuccess={() => {
+          setShowPasswordModal(false);
+          setSent(true);
+          toaster.create({ title: 'Contraseña restablecida', type: 'success' });
+        }}
+      />
 
       <Toaster />
     </Flex>

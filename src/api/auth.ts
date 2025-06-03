@@ -1,7 +1,7 @@
 // src/api/auth.ts
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface LoginData {
   email: string;
@@ -72,7 +72,7 @@ export const forgotPassword = async (
 ): Promise<ForgotPasswordResponse> => {
   try {
     const response = await axios.post<ForgotPasswordResponse>(
-      `${API_URL}/users/forgot-password`,
+      `${API_URL}/auth/forgot-password`,
       data
     );
     return response.data;
