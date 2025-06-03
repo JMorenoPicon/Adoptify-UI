@@ -72,7 +72,7 @@ export const forgotPassword = async (
 ): Promise<ForgotPasswordResponse> => {
   try {
     const response = await axios.post<ForgotPasswordResponse>(
-      `${API_URL}/users/forgot-password`,
+      `${API_URL}/auth/forgot-password`,
       data
     );
     return response.data;
