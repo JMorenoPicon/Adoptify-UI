@@ -29,7 +29,7 @@ import { citiesOfSpain } from '@/assets/cities';
 import { MapPicker } from '@/components/maps/MapPicker';
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const initialEditForm = {
   name: '',

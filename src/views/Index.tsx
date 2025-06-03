@@ -15,7 +15,7 @@ import axios from 'axios';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333/api/v1';
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 const news = [
