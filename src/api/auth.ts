@@ -10,6 +10,7 @@ export interface LoginData {
 
 export interface LoginResponse {
   token: string;
+  isVerified: boolean;
   // cualquier otro campo que devuelva tu backend (usuario, roles…)
 }
 

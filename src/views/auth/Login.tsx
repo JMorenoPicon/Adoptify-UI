@@ -1,5 +1,5 @@
 // src/views/auth/Login.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Flex,
   Box,
@@ -17,7 +17,7 @@ import { toaster, Toaster } from '@/components/ui/toaster';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { login } from '@/api/auth';
 import axios from 'axios';
-import { useEffect } from 'react';
+import { VerifyCodeModal } from '@/components/ui/verifyCodeModal';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,6 +30,8 @@ const Login: React.FC = () => {
   }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -54,6 +56,17 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       const { data } = await login({ email, password });
+      if (data.isVerified === false) {
+        setRegisteredEmail(email);
+        setShowVerifyModal(true);
+        toaster.create({
+          title: 'Verifica tu cuenta',
+          description: 'Tu cuenta no está verificada. Ingresa el código enviado a tu email.',
+          type: 'info',
+        });
+        setLoading(false);
+        return;
+      }
       const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
       localStorage.setItem('token', data.token);
       localStorage.setItem('token_expires', expiresAt.toString());
@@ -67,7 +80,24 @@ const Login: React.FC = () => {
     } catch (err: unknown) {
       let msg = 'Error en la autenticación';
       if (axios.isAxiosError(err)) {
-        msg = (err.response?.data as { message?: string })?.message ?? msg;
+        const status = err.response?.status;
+        const backendMsg = (err.response?.data as { message?: string })?.message ?? msg;
+        // Si es 403 y el mensaje es de verificación, abre el modal
+        if (
+          status === 403 &&
+          backendMsg.toLowerCase().includes('verificar')
+        ) {
+          setRegisteredEmail(email);
+          setShowVerifyModal(true);
+          toaster.create({
+            title: 'Verifica tu cuenta',
+            description: backendMsg,
+            type: 'info',
+          });
+          setLoading(false);
+          return;
+        }
+        msg = backendMsg;
       }
       setErrors({ general: msg });
       toaster.create({
@@ -190,6 +220,21 @@ const Login: React.FC = () => {
       </Box>
 
       <Toaster />
+
+      {/* Modal de verificación de email */}
+      <VerifyCodeModal
+        open={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        email={registeredEmail}
+        onSuccess={() => {
+          setShowVerifyModal(false);
+          toaster.create({
+            title: 'Cuenta verificada',
+            description: 'Tu cuenta ha sido verificada. Ahora puedes iniciar sesión.',
+            type: 'success',
+          });
+        }}
+      />
     </Flex>
   );
 };
