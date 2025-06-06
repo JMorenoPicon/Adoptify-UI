@@ -36,6 +36,15 @@ const Footer: React.FC = () => {
         >
           Ver en GitHub
         </a>
+        <span style={{ margin: '0 12px' }}>|</span>
+        <a
+          href="http://localhost:3333/api-docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: 'teal', textDecoration: 'underline' }}
+        >
+          API (Swagger)
+        </a>
       </Text>
     </Box>
   );
