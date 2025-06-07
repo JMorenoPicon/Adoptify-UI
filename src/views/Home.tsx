@@ -29,7 +29,7 @@ const Home: React.FC = () => {
                 left={0}
                 w="full"
                 h="full"
-                backgroundImage="url('../homeImage.png')"
+                backgroundImage="url('https://res.cloudinary.com/dvgooco4p/image/upload/homeImage_daqapm.png')"
                 backgroundRepeat="no-repeat"
                 backgroundPosition="left-center"
                 backgroundSize="auto 100%"
