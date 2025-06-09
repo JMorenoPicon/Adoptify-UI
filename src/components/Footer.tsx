@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
         </a>
         <span style={{ margin: '0 12px' }}>|</span>
         <a
-          href="http://localhost:3333/api-docs"
+          href="https://petfinder-backend-nse4.onrender.com/api-docs"
           target="_blank"
           rel="noopener noreferrer"
           style={{ color: 'teal', textDecoration: 'underline' }}
