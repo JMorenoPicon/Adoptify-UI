@@ -9,8 +9,14 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { FiLogOut, FiUser } from 'react-icons/fi'
+import { FiLogOut, FiUser, FiMenu } from 'react-icons/fi'
 import { useColorModeValue } from '@/components/ui/color-mode'
+import {
+  MenuRoot,
+  MenuTrigger,
+  MenuContent,
+  MenuItem,
+} from '@/components/ui/menu'
 
 const Navbar: React.FC = () => {
   const bg = useColorModeValue('white', 'gray.800')
@@ -52,7 +58,7 @@ const Navbar: React.FC = () => {
         </RouterLink>
       </Box>
 
-      {/* Links de navegación */}
+      {/* Links de navegación (desktop) */}
       <HStack gap={4} display={{ base: 'none', md: 'flex' }}>
         <RouterLink to="/index">
           <Button
@@ -83,8 +89,34 @@ const Navbar: React.FC = () => {
         </RouterLink>
       </HStack>
 
-      {/* Icono de usuario y cerrar sesión */}
+      {/* Iconos y menú hamburguesa */}
       <HStack gap={2}>
+        {/* Menú hamburguesa solo en mobile */}
+        <Box display={{ base: 'block', md: 'none' }}>
+          <MenuRoot>
+            <MenuTrigger asChild>
+              <IconButton
+                aria-label="Abrir menú"
+                variant="ghost"
+                color="brand.500"
+                _hover={{ bg: 'pastelBlue.50', color: 'brand.600' }}
+              >
+                <FiMenu />
+              </IconButton>
+            </MenuTrigger>
+            <MenuContent>
+              <RouterLink to="/index">
+                <MenuItem value="inicio">Inicio</MenuItem>
+              </RouterLink>
+              <RouterLink to="/adopt">
+                <MenuItem value="adopt">Animales en adopción</MenuItem>
+              </RouterLink>
+              <RouterLink to="/lost">
+                <MenuItem value="lost">Mascotas perdidas</MenuItem>
+              </RouterLink>
+            </MenuContent>
+          </MenuRoot>
+        </Box>
         <IconButton
           aria-label="Perfil"
           variant="ghost"
