@@ -12,17 +12,17 @@ import { useColorModeValue } from '@/components/ui/color-mode';
 
 const Home: React.FC = () => {
     // Capa de superposición más clara en light y dark modes
-  const overlayBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.3)',
-    'rgba(0,0,0,0.4)'
-  );
-  // Título en naranja de brand, texto en gris oscuro o claro
-  const headingColor = useColorModeValue('brand.600', 'brand.200');
-  const textColor = useColorModeValue('gray.800', 'gray.200');
+    const overlayBg = useColorModeValue(
+        'rgba(255, 255, 255, 0.3)',
+        'rgba(0,0,0,0.4)'
+    );
+    // Título en naranja de brand, texto en gris oscuro o claro
+    const headingColor = useColorModeValue('brand.600', 'brand.200');
+    const textColor = useColorModeValue('gray.800', 'gray.200');
 
     return (
         <Box position="relative" h="100vh" w="full" overflow="hidden">
-            {/* Imagen de fondo */}
+            {/* Imagen de fondo responsive*/}
             <Box
                 position="absolute"
                 top={0}
@@ -31,8 +31,11 @@ const Home: React.FC = () => {
                 h="full"
                 backgroundImage="url('https://res.cloudinary.com/dvgooco4p/image/upload/homeImage_daqapm.png')"
                 backgroundRepeat="no-repeat"
-                backgroundPosition="left-center"
-                backgroundSize="auto 100%"
+                backgroundPosition={{ base: 'center', md: 'left center' }}
+                backgroundSize={{ base: 'cover', md: 'auto 100%' }}
+                maxW={{ base: '100vw', md: 'none' }}
+                maxH={{ base: '100vw', md: 'none' }}
+                aspectRatio={{ base: '1 / 1', md: 'auto' }}
                 zIndex={0}
             />
 
