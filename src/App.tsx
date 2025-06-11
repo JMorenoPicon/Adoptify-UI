@@ -18,6 +18,7 @@ import Profile from './views/profile/Profile';
 import PetDetail from '@/views/pets/PetDetail';
 import AdoptablePets from './views/AdoptablePets';
 import LostPets from './views/LostPets';
+import AdminPanel from './views/AdminPanel';
 
 const NoNavBarRoutes = [
   '/',
@@ -104,6 +105,15 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <LostPets />
+            </ProtectedRoute>
+          }
+        />
+        {/* Admin Panel */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
             </ProtectedRoute>
           }
         />
