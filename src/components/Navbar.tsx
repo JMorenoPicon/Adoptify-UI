@@ -17,11 +17,33 @@ import {
   MenuContent,
   MenuItem,
 } from '@/components/ui/menu'
+import { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const Navbar: React.FC = () => {
   const bg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const navigate = useNavigate()
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  type JwtPayload = {
+    role?: string;
+    [key: string]: unknown;
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = jwtDecode<JwtPayload>(token);
+        setIsAdmin(payload.role === 'admin');
+      } catch {
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -87,6 +109,17 @@ const Navbar: React.FC = () => {
             Mascotas perdidas
           </Button>
         </RouterLink>
+        {isAdmin && (
+          <RouterLink to="/admin">
+            <Button
+              variant="ghost"
+              _hover={{ bg: 'pastelBlue.50' }}
+              color="gray.600"
+            >
+              Administrador
+            </Button>
+          </RouterLink>
+        )}
       </HStack>
 
       {/* Iconos y menú hamburguesa */}
@@ -114,6 +147,11 @@ const Navbar: React.FC = () => {
               <RouterLink to="/lost">
                 <MenuItem value="lost">Mascotas perdidas</MenuItem>
               </RouterLink>
+              {isAdmin && (
+                <RouterLink to="/admin">
+                  <MenuItem value="admin">Administrador</MenuItem>
+                </RouterLink>
+              )}
             </MenuContent>
           </MenuRoot>
         </Box>
