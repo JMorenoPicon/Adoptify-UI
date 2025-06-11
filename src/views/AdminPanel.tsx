@@ -18,12 +18,37 @@ import {
 import axios from 'axios';
 import { toaster } from '@/components/ui/toaster';
 import { useColorModeValue } from '@/components/ui/color-mode';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  DialogCloseTrigger,
+} from '@/components/ui/dialog';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type User = { _id: string; username: string; email: string; role: string };
-type Pet = { _id: string; name: string; species: string; owner: { username?: string } | string };
-type Comment = { _id: string; content: string; author: { username?: string } | string; pet: { name?: string } | string };
+type User = {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+};
+
+type Pet = {
+  _id: string;
+  name: string;
+  species: string;
+  owner: { username?: string } | string;
+};
+
+type Comment = {
+  _id: string;
+  content: string;
+  author: { username?: string } | string;
+  pet: { _id: string; name?: string } | string;
+};
 
 const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -31,6 +56,13 @@ const AdminPanel: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
+  const [petDeleteModalOpen, setPetDeleteModalOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<Comment | null>(null);
+  const [commentDeleteModalOpen, setCommentDeleteModalOpen] = useState(false);
+
   const bg = useColorModeValue('pastelBlue.50', 'gray.800');
   const color = useColorModeValue('gray.800', 'gray.100');
 
@@ -40,36 +72,91 @@ const AdminPanel: React.FC = () => {
     [token]
   );
 
-  useEffect(() => {
+  const fetchAdminData = async () => {
     setLoading(true);
-    Promise.all([
-      axios.get(`${API_URL}/admin/users`, { headers }),
-      axios.get(`${API_URL}/admin/pets`, { headers }),
-      axios.get(`${API_URL}/admin/comments`, { headers }),
-    ])
-      .then(([usersRes, petsRes, commentsRes]) => {
-        setUsers(usersRes.data);
-        setPets(petsRes.data);
-        setComments(commentsRes.data);
-      })
-      .catch(() => toaster.create({ title: 'Error loading admin data', type: 'error' }))
-      .finally(() => setLoading(false));
+    try {
+      const [usersRes, petsRes, commentsRes] = await Promise.all([
+        axios.get(`${API_URL}/users`, { headers }),
+        axios.get(`${API_URL}/pets`, { headers }),
+        axios.get(`${API_URL}/comments`, { headers }),
+      ]);
+      setUsers(usersRes.data);
+      setPets(petsRes.data);
+      setComments(commentsRes.data);
+    } catch {
+      toaster.create({ title: 'Error loading admin data', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headers]);
 
   const handleDeleteUser = async (id: string) => {
-    await axios.delete(`${API_URL}/admin/users/${id}`, { headers });
-    setUsers(users.filter(u => u._id !== id));
-    toaster.create({ title: 'User deleted', type: 'success' });
+    await axios.delete(`${API_URL}/users/${id}`, { headers });
+    toaster.create({ title: 'Usuario eliminado', type: 'success' });
+    fetchAdminData();
   };
   const handleDeletePet = async (id: string) => {
-    await axios.delete(`${API_URL}/admin/pets/${id}`, { headers });
-    setPets(pets.filter(p => p._id !== id));
-    toaster.create({ title: 'Pet deleted', type: 'success' });
+    await axios.delete(`${API_URL}/pets/${id}`, { headers });
+    toaster.create({ title: 'Mascota eliminada', type: 'success' });
+    fetchAdminData();
   };
-  const handleDeleteComment = async (id: string) => {
-    await axios.delete(`${API_URL}/admin/comments/${id}`, { headers });
-    setComments(comments.filter(c => c._id !== id));
-    toaster.create({ title: 'Comment deleted', type: 'success' });
+  const handleDeleteComment = async (petId: string, commentId: string) => {
+    await axios.delete(`${API_URL}/comments/${petId}/${commentId}`, { headers });
+    toaster.create({ title: 'Comentario eliminado', type: 'success' });
+    fetchAdminData();
+  };
+
+  const openDeleteModal = (user: User) => {
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setUserToDelete(null);
+    setDeleteModalOpen(false);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    await handleDeleteUser(userToDelete._id);
+    closeDeleteModal();
+  };
+
+  // Funciones para abrir/cerrar modales:
+  const openDeletePetModal = (pet: Pet) => {
+    setPetToDelete(pet);
+    setPetDeleteModalOpen(true);
+  };
+  const closeDeletePetModal = () => {
+    setPetToDelete(null);
+    setPetDeleteModalOpen(false);
+  };
+  const confirmDeletePet = async () => {
+    if (!petToDelete) return;
+    await handleDeletePet(petToDelete._id);
+    closeDeletePetModal();
+  };
+
+  const openDeleteCommentModal = (comment: Comment) => {
+    setCommentToDelete(comment);
+    setCommentDeleteModalOpen(true);
+  };
+  const closeDeleteCommentModal = () => {
+    setCommentToDelete(null);
+    setCommentDeleteModalOpen(false);
+  };
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
+    const petId = typeof commentToDelete.pet === 'object'
+      ? commentToDelete.pet._id
+      : commentToDelete.pet;
+    await handleDeleteComment(petId, commentToDelete._id);
+    closeDeleteCommentModal();
   };
 
   if (loading) return (
@@ -134,7 +221,15 @@ const AdminPanel: React.FC = () => {
                       <Td>{user.email}</Td>
                       <Td>{user.role}</Td>
                       <Td>
-                        <Button colorScheme="red" size="sm" onClick={() => handleDeleteUser(user._id)}>Eliminar</Button>
+                        {user.role !== 'admin' && (
+                          <Button
+                            colorScheme="red"
+                            size="sm"
+                            onClick={() => openDeleteModal(user)}
+                          >
+                            Eliminar
+                          </Button>
+                        )}
                       </Td>
                     </Tr>
                   ))}
@@ -158,7 +253,9 @@ const AdminPanel: React.FC = () => {
                       <Td>{pet.species}</Td>
                       <Td>{typeof pet.owner === 'object' ? pet.owner.username : pet.owner}</Td>
                       <Td>
-                        <Button colorScheme="red" size="sm" onClick={() => handleDeletePet(pet._id)}>Eliminar</Button>
+                        <Button colorScheme="red" size="sm" onClick={() => openDeletePetModal(pet)}>
+                          Eliminar
+                        </Button>
                       </Td>
                     </Tr>
                   ))}
@@ -182,7 +279,13 @@ const AdminPanel: React.FC = () => {
                       <Td>{typeof comment.author === 'object' ? comment.author.username : comment.author}</Td>
                       <Td>{typeof comment.pet === 'object' ? comment.pet.name : comment.pet}</Td>
                       <Td>
-                        <Button colorScheme="red" size="sm" onClick={() => handleDeleteComment(comment._id)}>Eliminar</Button>
+                        <Button
+                          colorScheme="red"
+                          size="sm"
+                          onClick={() => openDeleteCommentModal(comment)}
+                        >
+                          Eliminar
+                        </Button>
                       </Td>
                     </Tr>
                   ))}
@@ -191,6 +294,74 @@ const AdminPanel: React.FC = () => {
             </TabPanel>
           </TabPanels>
         </TabsRoot>
+        {/* Modal de confirmación de borrado de usuario */}
+        <DialogRoot open={deleteModalOpen} onOpenChange={d => setDeleteModalOpen(d.open)}>
+          <DialogContent>
+            <DialogHeader color="red.600">Eliminar usuario</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar a <strong>{userToDelete?.username}</strong>?<br />
+              <span style={{ color: "#E53E3E" }}>
+                Esta acción eliminará también todas sus mascotas y comentarios. Esta acción no se puede deshacer.
+              </span>
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="red" mr={3} onClick={confirmDeleteUser}>
+                Eliminar
+              </Button>
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost" onClick={closeDeleteModal}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Modal de confirmación de borrado de mascota */}
+        <DialogRoot open={petDeleteModalOpen} onOpenChange={d => setPetDeleteModalOpen(d.open)}>
+          <DialogContent>
+            <DialogHeader color="red.600">Eliminar mascota</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar a <strong>{petToDelete?.name}</strong>?<br />
+              <span style={{ color: "#E53E3E" }}>
+                Esta acción eliminará la mascota de la base de datos. Esta acción no se puede deshacer.
+              </span>
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="red" mr={3} onClick={confirmDeletePet}>
+                Eliminar
+              </Button>
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost" onClick={closeDeletePetModal}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
+
+        {/* Modal de confirmación de borrado de comentario */}
+        <DialogRoot open={commentDeleteModalOpen} onOpenChange={d => setCommentDeleteModalOpen(d.open)}>
+          <DialogContent>
+            <DialogHeader color="red.600">Eliminar comentario</DialogHeader>
+            <DialogBody>
+              ¿Seguro que quieres eliminar este comentario?<br />
+              <span style={{ color: "#E53E3E" }}>
+                Esta acción eliminará el comentario de la base de datos. Esta acción no se puede deshacer.
+              </span>
+            </DialogBody>
+            <DialogFooter>
+              <Button colorScheme="red" mr={3} onClick={confirmDeleteComment}>
+                Eliminar
+              </Button>
+              <DialogCloseTrigger asChild>
+                <Button variant="ghost" onClick={closeDeleteCommentModal}>
+                  Cancelar
+                </Button>
+              </DialogCloseTrigger>
+            </DialogFooter>
+          </DialogContent>
+        </DialogRoot>
       </Box>
     </Flex>
   );
